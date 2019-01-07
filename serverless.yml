@@ -1,0 +1,38 @@
+service: oauth
+
+provider:
+  name: aws
+  region: ap-northeast-1
+  runtime: python3.7
+  stage: ${env:ALIS_APP_ID}
+  endpointType: regional
+  environment:
+    AUTHLETE_API_KEY: ${ssm:${env:ALIS_APP_ID}ssmAutlteleApiKey}
+    AUTHLETE_API_SECRET: ${ssm:${env:ALIS_APP_ID}ssmAutlteleApiSecret}
+
+#package:
+#  exclude:
+#     - '**'
+#     - '!lambdas/**'
+#     - '!lib/**'
+
+functions:
+  discovery:
+    handler: lambdas/http/well-known/openid-configuration.handler
+    events:
+      - http:
+          path: /.well-known/openid-configuration
+          method: get
+          cors: true
+
+custom:
+  pythonRequirements:
+    dockerizePip: false
+    pythonBin: ${self:provider.runtime}
+  prune:
+    automatic: true
+    number: 3
+
+plugins:
+  - serverless-python-requirements
+  - serverless-prune-plugin
