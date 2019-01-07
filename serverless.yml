@@ -10,15 +10,15 @@ provider:
     AUTHLETE_API_KEY: ${ssm:${env:ALIS_APP_ID}ssmAutlteleApiKey}
     AUTHLETE_API_SECRET: ${ssm:${env:ALIS_APP_ID}ssmAutlteleApiSecret}
 
-#package:
-#  exclude:
-#     - '**'
-#     - '!lambdas/**'
-#     - '!lib/**'
+package:
+  exclude:
+     - '**'
+     - '!lambdas/**'
+     - '!lib/**'
 
 functions:
   discovery:
-    handler: lambdas/http/well-known/openid-configuration.handler
+    handler: lambdas/http/well_known/openid_configuration.handler
     events:
       - http:
           path: /.well-known/openid-configuration

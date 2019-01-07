@@ -13,7 +13,6 @@ def handler(event, context):
         )
 
         configuration = authlete.get_openid_configuration()
-        print(configuration)
 
     except AuthleteApiError as e:
         logger.error(e)
