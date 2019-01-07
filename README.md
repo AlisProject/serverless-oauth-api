@@ -40,13 +40,3 @@ Run Integration test
 ```bash
 $ pytest tests/integration/ --stage $INTEGRATION_TEST_STAGE --region $AWS_DEFAULT_REGION -s
 ```
-
-## Release
-This project includes DB and API stack. You can deploy each stack with tagging with `db-` prefix or `api-` to GitHub.
-
-```bash
-$ git tag db-1.0.0
-$ git push origin db-1.0.0
-$ git tag api-1.0.0
-$ git push origin api-1.0.0
-```
