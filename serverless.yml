@@ -29,6 +29,7 @@ custom:
   pythonRequirements:
     dockerizePip: false
     pythonBin: ${self:provider.runtime}
+    fileName: requirements-prod.txt
   prune:
     automatic: true
     number: 3
