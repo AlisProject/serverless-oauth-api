@@ -1,6 +1,6 @@
-export AWS_DEFAULT_REGION=ap-northeast-1
-export AWS_ACCESS_KEY_ID=AKIAJZCGSXXXXXXXXXX
-export AWS_SECRET_ACCESS_KEY=iU6/q6ls5i5pDBPxxxxxxxxxxxxxxxxxxxx
-export INTEGRATION_TEST_STAGE=integration
-export PYTHONPATH=./
-export ALIS_APP_ID=xxxxxxxx
+export AWS_DEFAULT_REGION=ap-northeast-1 # 変更必要なし
+export AWS_ACCESS_KEY_ID=AKIAJZCGSXXXXXXXXXX　# 開発者に発行された値を指定してください
+export AWS_SECRET_ACCESS_KEY=iU6/q6ls5i5pDBPxxxxxxxxxxxxxxxxxxxx # 開発者に発行された値を指定してください
+export INTEGRATION_TEST_STAGE=integration # インテグレーションテストが実施される環境です。他者と被らなさそうな値を指定してください
+export PYTHONPATH=./ # 変更必要なし
+export ALIS_APP_ID=xxxxxxxx # serverless-applicationで指定した値を指定してください。environmentsリポジトリのsecretパラメータを判定するのに必要です
