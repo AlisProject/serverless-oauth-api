@@ -1,7 +1,7 @@
 import json
 import requests
 from lib.exceptions import AuthleteApiError
-from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL
+from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL, AUTHLETE_JWK_INFORMATION_URL
 
 
 class AuthleteSdk():
@@ -18,6 +18,21 @@ class AuthleteSdk():
         if response.status_code is not 200:
             raise AuthleteApiError(
                 endpoint=AUTHLETE_OPENID_CONFIGURATION_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
+
+        return json.loads(response.text)
+
+    def get_jwk_information(self):
+        response = requests.get(
+            url=AUTHLETE_JWK_INFORMATION_URL,
+            auth=(self.api_key, self.api_secret)
+        )
+
+        if response.status_code is not 200:
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_JWK_INFORMATION_URL,
                 status_code=response.status_code,
                 message=response.text
             )
