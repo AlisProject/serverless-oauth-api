@@ -88,7 +88,7 @@ class AuthleteSdk():
         if user_info['resultCode'] != AUTHLETE_USERINFO_SUCCESS_CODE:
             raise AuthleteApiError(
                 endpoint=AUTHLETE_USERINFO_URL,
-                status_code=400,
+                status_code=401,
                 message=user_info['resultMessage']
             )
 
