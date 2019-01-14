@@ -1,7 +1,7 @@
 import json
 import requests
-from lib.exceptions import AuthleteApiError
-from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL, API_DOMAIN, INTROSPECTION_ENDPOINT
+from lib.exceptions import AuthleteApiError, ValidationError
+from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL, API_DOMAIN, INTROSPECTION_ENDPOINT, AUTHLETE_USERINFO_URL
 
 
 class AuthleteSdk():
@@ -15,7 +15,7 @@ class AuthleteSdk():
             auth=(self.api_key, self.api_secret)
         )
 
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise AuthleteApiError(
                 endpoint=AUTHLETE_OPENID_CONFIGURATION_URL,
                 status_code=response.status_code,
@@ -38,3 +38,57 @@ class AuthleteSdk():
             'claims_supported': configuration['claims_supported'],
             'code_challenge_methods_supported': ["S256"]
         }
+
+    def get_access_token_from_header(self, headers):
+        auth = headers.get('Authorization', None)
+        if not auth:
+            raise ValidationError(
+                status_code=401,
+                message='Missing Authorization header'
+            )
+
+        parts = auth.split()
+
+        if parts[0].lower() != 'bearer':
+            raise ValidationError(
+                status_code=401,
+                message='Authorization header must start with Bearer'
+            )
+
+        elif len(parts) == 1:
+            raise ValidationError(
+                status_code=401,
+                message='Token not found'
+            )
+
+        elif len(parts) > 2:
+            raise ValidationError(
+                status_code=401,
+                message='Authorization header must be Bearer token'
+            )
+
+        return parts[1]
+
+    def get_user_info(self, access_token):
+        response = requests.post(
+            url=AUTHLETE_USERINFO_URL,
+            auth=(self.api_key, self.api_secret),
+            data={'token':access_token}
+        )
+
+        if response.status_code != 200:
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_USERINFO_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
+
+        user_info = json.loads(response.text)
+        if user_info['resultCode'] != 'A096001':
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_USERINFO_URL,
+                status_code=400,
+                message=user_info['resultMessage']
+            )
+
+        return json.loads(user_info['responseContent'])
