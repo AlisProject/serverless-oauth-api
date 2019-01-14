@@ -5,7 +5,6 @@ import json
 
 class TestUserInfo(object):
     def setup(self):
-        user_id = 'horike'
         ssm = boto3.client('ssm')
         param = ssm.get_parameter(
             Name=os.environ['ALIS_APP_ID'] + 'ssmAutlteleApiKey'
