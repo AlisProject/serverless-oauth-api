@@ -2,6 +2,7 @@ import json
 import requests
 from lib.exceptions import AuthleteApiError
 from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL, API_DOMAIN, INTROSPECTION_ENDPOINT
+from lib.settings import AUTHLETE_INTROSPECTION_URL, AUTHLETE_INTROSPECTION_SUCCESS_CODE
 
 
 class AuthleteSdk():
@@ -38,3 +39,26 @@ class AuthleteSdk():
             'claims_supported': configuration['claims_supported'],
             'code_challenge_methods_supported': ["S256"]
         }
+
+    def verify_access_token(self, token):
+        response = requests.post(
+            url=AUTHLETE_INTROSPECTION_URL,
+            auth=(self.api_key, self.api_secret),
+            data={'parameters':'token='+token+'&token_type_hint=access_token'}
+        )
+
+        if response.status_code is not 200:
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_INTROSPECTION_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
+
+        result = json.loads(response.text)
+        if result['resultCode'] != AUTHLETE_INTROSPECTION_SUCCESS_CODE:
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_INTROSPECTION_URL,
+                status_code=400,
+                message=user_info['resultMessage']
+            )
+        return json.loads(result['responseContent'])
