@@ -1,7 +1,7 @@
 import json
 import requests
 from lib.exceptions import AuthleteApiError
-from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL
+from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL, API_DOMAIN, INTROSPECTION_ENDPOINT
 
 
 class AuthleteSdk():
@@ -21,5 +21,20 @@ class AuthleteSdk():
                 status_code=response.status_code,
                 message=response.text
             )
-
-        return json.loads(response.text)
+        configuration = json.loads(response.text)
+        return {
+            'issuer': configuration['issuer'],
+            'authorization_endpoint': configuration['authorization_endpoint'],
+            'token_endpoint': configuration['token_endpoint'],
+            'token_introspection_endpoint': API_DOMAIN + INTROSPECTION_ENDPOINT,
+            'userinfo_endpoint': configuration['userinfo_endpoint'],
+            'jwks_uri': configuration['jwks_uri'],
+            'scopes_supported': configuration['scopes_supported'],
+            'response_types_supported': configuration['response_types_supported'],
+            'grant_types_supported': configuration['grant_types_supported'],
+            'subject_types_supported': configuration['subject_types_supported'],
+            'id_token_signing_alg_values_supported': ["RS256"],
+            'token_endpoint_auth_methods_supported': configuration['token_endpoint_auth_methods_supported'],
+            'claims_supported': configuration['claims_supported'],
+            'code_challenge_methods_supported': ["S256"]
+        }
