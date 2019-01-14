@@ -1,7 +1,8 @@
 import json
 import requests
 from lib.exceptions import AuthleteApiError, ValidationError
-from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL, API_DOMAIN, INTROSPECTION_ENDPOINT, AUTHLETE_USERINFO_URL
+from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL, API_DOMAIN, INTROSPECTION_ENDPOINT
+from lib.settings import AUTHLETE_USERINFO_URL, AUTHLETE_USERINFO_SUCCESS_CODE
 
 
 class AuthleteSdk():
@@ -84,7 +85,7 @@ class AuthleteSdk():
             )
 
         user_info = json.loads(response.text)
-        if user_info['resultCode'] != 'A096001':
+        if user_info['resultCode'] != AUTHLETE_USERINFO_SUCCESS_CODE:
             raise AuthleteApiError(
                 endpoint=AUTHLETE_USERINFO_URL,
                 status_code=400,
