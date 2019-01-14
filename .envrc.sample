@@ -4,3 +4,6 @@ export AWS_SECRET_ACCESS_KEY=iU6/q6ls5i5pDBPxxxxxxxxxxxxxxxxxxxx # 開発者に�
 export INTEGRATION_TEST_STAGE=integration # インテグレーションテストが実施される環境です。他者と被らなさそうな値を指定してください
 export PYTHONPATH=./ # 変更必要なし
 export ALIS_APP_ID=xxxxxxxx # serverless-applicationで指定した値を指定してください。environmentsリポジトリのsecretパラメータを判定するのに必要です
+export TEST_COGNITO_USER_ID=xxxxx # インテグレーションテストで使用されるCognitoのUserIDを指定してください
+export TEST_AUTHLETE_CLIENT_ID=xxxxx # インテグレーションテストで使用するAuthleteのclient_idを指定してください
+export TEST_AUTHLETE_CLIENT_SECRET=xxxxx　# インテグレーションテストで使用するAuthleteのclient_secretを指定してください
