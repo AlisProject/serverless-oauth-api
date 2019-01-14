@@ -6,9 +6,17 @@ provider:
   runtime: python3.7
   stage: ${env:ALIS_APP_ID}
   endpointType: regional
+  memorySize: 256
   environment:
     AUTHLETE_API_KEY: ${ssm:${env:ALIS_APP_ID}ssmAutlteleApiKey}
     AUTHLETE_API_SECRET: ${ssm:${env:ALIS_APP_ID}ssmAutlteleApiSecret}
+    COGNITO_USER_POOL_ID: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolId}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "*"
+      Resource:
+        - "arn:aws:cognito-idp:${self:provider.region}:*:userpool/${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolId}"
 
 package:
   exclude:
@@ -29,6 +37,13 @@ functions:
     events:
       - http:
           path: /jwks
+          method: get
+          cors: true
+  userinfo:
+    handler: lambdas/http/userinfo.handler
+    events:
+      - http:
+          path: /userinfo
           method: get
           cors: true
 
