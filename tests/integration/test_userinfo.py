@@ -69,9 +69,9 @@ class TestUserInfo(object):
         )
         assert response.status_code == 401
 
-    def test_return_400_with_fake_accesstoken(self, endpoint):
+    def test_return_401_with_fake_accesstoken(self, endpoint):
         response = requests.get(
             url=endpoint + '/userinfo',
             headers={'Authorization':'Bearer xxxxxxxxxxxxxxx'}
         )
-        assert response.status_code == 400
+        assert response.status_code == 401

@@ -27,7 +27,7 @@ def handler(event, context):
             'error_message': e.message
         })
     except AuthleteApiError as e:
-        if e.status_code != 400:
+        if e.status_code != 401:
             logger.error(e)
             return response_builder(500, {
                 'error_message': 'Internal Server Error'
