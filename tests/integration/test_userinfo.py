@@ -5,7 +5,6 @@ import json
 
 class TestUserInfo(object):
     def setup(self):
-        authlete_client_id = '9838999782264'
         user_id = 'horike'
         ssm = boto3.client('ssm')
         param = ssm.get_parameter(
