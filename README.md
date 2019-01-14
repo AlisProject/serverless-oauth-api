@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/AlisProject/serverless-oauth-api/tree/master.svg?style=svg&circle-token=e71816ed083a9ca2eb20f56c6ede43d56f2e4af4)](https://circleci.com/gh/AlisProject/serverless-oauth-api/tree/master)
+
 # Serverless OAuth API
 
 OAuth API for ALIS with backed Authlete.
