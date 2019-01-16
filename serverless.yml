@@ -2,7 +2,7 @@ service: oauth
 
 provider:
   name: aws
-  region: ap-northeast-1
+  region: ${env:AWS_DEFAULT_REGION}
   runtime: python3.7
   stage: ${env:ALIS_APP_ID}
   endpointType: regional
@@ -30,6 +30,13 @@ functions:
     events:
       - http:
           path: /.well-known/openid-configuration
+          method: get
+          cors: true
+  jwks:
+    handler: lambdas/http/jwks.handler
+    events:
+      - http:
+          path: /jwks
           method: get
           cors: true
   userinfo:
