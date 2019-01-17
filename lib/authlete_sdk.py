@@ -1,6 +1,7 @@
 import json
 import requests
 from lib.exceptions import AuthleteApiError, ValidationError
+from lib.settings import AUTHLETE_JWK_INFORMATION_URL
 from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL, API_DOMAIN, INTROSPECTION_ENDPOINT
 from lib.settings import AUTHLETE_INTROSPECTION_URL, AUTHLETE_INTROSPECTION_SUCCESS_CODE
 from lib.settings import AUTHLETE_USERINFO_URL, AUTHLETE_USERINFO_SUCCESS_CODE
@@ -23,6 +24,7 @@ class AuthleteSdk():
                 status_code=response.status_code,
                 message=response.text
             )
+
         configuration = json.loads(response.text)
         return {
             'issuer': configuration['issuer'],
@@ -40,6 +42,21 @@ class AuthleteSdk():
             'claims_supported': configuration['claims_supported'],
             'code_challenge_methods_supported': ["S256"]
         }
+
+    def get_jwk_information(self):
+        response = requests.get(
+            url=AUTHLETE_JWK_INFORMATION_URL,
+            auth=(self.api_key, self.api_secret)
+        )
+
+        if response.status_code is not 200:
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_JWK_INFORMATION_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
+
+        return json.loads(response.text)
 
     def verify_access_token(self, token):
         response = requests.post(
