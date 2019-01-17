@@ -32,6 +32,12 @@ functions:
           path: /.well-known/openid-configuration
           method: get
           cors: true
+  introspection:
+    handler: lambdas/http/introspection.handler
+    events:
+      - http:
+          path: /introspection
+          method: post
   jwks:
     handler: lambdas/http/jwks.handler
     events:
