@@ -52,6 +52,13 @@ functions:
           path: /userinfo
           method: get
           cors: true
+  token:
+    handler: lambdas/http/token.handler
+    events:
+      - http:
+          path: /token
+          method: post
+          cors: true
 
 custom:
   pythonRequirements:

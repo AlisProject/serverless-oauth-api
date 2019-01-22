@@ -1,5 +1,7 @@
 import json
 import requests
+import base64
+import binascii
 from lib.exceptions import AuthleteApiError, ValidationError
 from lib.settings import AUTHLETE_JWK_INFORMATION_URL
 from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL, API_DOMAIN, INTROSPECTION_ENDPOINT
@@ -110,6 +112,48 @@ class AuthleteSdk():
             )
 
         return parts[1]
+
+    def get_clientid_and_clientsecret_from_basic_header(self, headers):
+        auth = headers.get('Authorization', None)
+        if not auth:
+            raise ValidationError(
+                status_code=401,
+                message='Missing Authorization header'
+            )
+
+        parts = auth.split()
+
+        if parts[0].lower() != 'basic':
+            raise ValidationError(
+                status_code=401,
+                message='Authorization header must start with Basic'
+            )
+
+        elif len(parts) == 1:
+            raise ValidationError(
+                status_code=401,
+                message='Token not found'
+            )
+
+        elif len(parts) > 2:
+            raise ValidationError(
+                status_code=401,
+                message='Authorization header must be Basic token'
+            )
+
+        try:
+            client_id,client_secret = base64.b64decode(parts[1].encode('utf-8')).decode('utf-8').split(':')
+        except Exception:
+            raise ValidationError(
+                status_code=401,
+                message='Authorization header must include correct base64 string'
+            )
+
+        return {
+            'client_id': client_id,
+            'client_secret': client_secret
+        }
+
 
     def get_user_info(self, access_token):
         response = requests.post(
