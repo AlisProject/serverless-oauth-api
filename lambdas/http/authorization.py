@@ -1,49 +1,32 @@
 import json
 import os
 import re
-import time
 import urllib.parse
-import urllib.request
-from jose import jwk, jwt
-from jose.utils import base64url_decode
+from jose import jwt
 from lib.authlete_sdk import AuthleteSdk
-from lib.exceptions import AuthleteApiError
+from lib.exceptions import AuthleteApiError, ValidationError
+from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_CLIENT_ID_IS_NOT_FOUND
+from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_CODE_CHALLENGE_IS_INVALID
+from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_CODE_CHALLENGE_METHOD_IS_NOT_SUPPORTED
+from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_DOES_NOT_CONTAIN_CLIENT_ID
+from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_DOES_NOT_CONTAIN_CODE_CHALLENGE_PARAMETER
+from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_DOES_NOT_CONTAIN_REDIRECT_URI
+from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_DOES_NOT_CONTAIN_RESPONSE_TYPE
+from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_REDIRECT_URI_IS_NOT_REGISTERED
+from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_RESPONSE_TYPE_IS_INVALID
 from lib.settings import AUTHLETE_AUTHORIZATION_SUCCESS_CODE
-from lib.utils import response_builder, logger
+from lib.settings import AUTHLETE_AUTHORIZATION_ISSUE_SUBJECT_DOES_NOT_CONTAIN
+from lib.utils import response_builder, logger, verify_jwt_token, get_access_token_from_header
 
-keys_url = 'https://cognito-idp.{}.amazonaws.com/{}/.well-known/jwks.json'.format(os.environ['AWS_REGION'], os.environ['COGNITO_USER_POOL_ID'])
-response = urllib.request.urlopen(keys_url)
-keys = json.loads(response.read())['keys']
-
-def verify_jwt_token(token):
-    try:
-        headers = jwt.get_unverified_headers(token)
-        kid = headers['kid']
-        key_index = -1
-        for i in range(len(keys)):
-            if kid == keys[i]['kid']:
-                key_index = i
-                break
-        public_key = jwk.construct(keys[key_index])
-        message, encoded_signature = str(token).rsplit('.', 1)
-        decoded_signature = base64url_decode(encoded_signature.encode('utf-8'))
-        if not public_key.verify(message.encode("utf8"), decoded_signature):
-            return False
-        claims = jwt.get_unverified_claims(token)
-        if time.time() > claims['exp']:
-            return False
-    except Exception:
-        return False
-    return True
 
 def handler(event, context):
     try:
         logger.info(event)
 
         # jwtの検証
-        jwt_token = re.sub(r'Bearer\s+', '', event['headers'].get('Authorization', ''), flags=re.IGNORECASE)
+        jwt_token = get_access_token_from_header(event['headers'])
         if not verify_jwt_token(jwt_token):
-            return response_builder(400, {"error_message": "invalid jwt token"})
+            return response_builder(401, {"error_message": "invalid jwt token"})
 
         # パラメーター設定
         claims = jwt.get_unverified_claims(jwt_token)
@@ -58,7 +41,19 @@ def handler(event, context):
             api_secret=os.environ['AUTHLETE_API_SECRET']
         )
         authrazition_response = authlete.authorization_request(new_params)
-        if authrazition_response['resultCode'] != AUTHLETE_AUTHORIZATION_SUCCESS_CODE:
+        AUTHORIZATION_ERROR_CODES = [
+            AUTHLETE_AUTHORIZATION_ERROR_CLIENT_ID_IS_NOT_FOUND
+            ,AUTHLETE_AUTHORIZATION_ERROR_CODE_CHALLENGE_IS_INVALID
+            ,AUTHLETE_AUTHORIZATION_ERROR_CODE_CHALLENGE_METHOD_IS_NOT_SUPPORTED
+            ,AUTHLETE_AUTHORIZATION_ERROR_DOES_NOT_CONTAIN_CLIENT_ID
+            ,AUTHLETE_AUTHORIZATION_ERROR_DOES_NOT_CONTAIN_CODE_CHALLENGE_PARAMETER
+            ,AUTHLETE_AUTHORIZATION_ERROR_DOES_NOT_CONTAIN_REDIRECT_URI
+            ,AUTHLETE_AUTHORIZATION_ERROR_DOES_NOT_CONTAIN_RESPONSE_TYPE
+            ,AUTHLETE_AUTHORIZATION_ERROR_REDIRECT_URI_IS_NOT_REGISTERED
+            ,AUTHLETE_AUTHORIZATION_ERROR_RESPONSE_TYPE_IS_INVALID
+            ,AUTHLETE_AUTHORIZATION_SUCCESS_CODE
+        ]
+        if authrazition_response['resultCode'] in AUTHORIZATION_ERROR_CODES:
             return response_builder(400, authrazition_response)
 
         # authorization issue API
@@ -67,9 +62,19 @@ def handler(event, context):
             "subject": claims['cognito:username'],
             "sub": claims['sub']
         })
+        if authrazition_issue_response['resultCode'] == AUTHLETE_AUTHORIZATION_ISSUE_SUBJECT_DOES_NOT_CONTAIN:
+            return response_builder(400, authrazition_response)
+        if authrazition_issue_response['resultCode'] != AUTHLETE_AUTHORIZATION_SUCCESS_CODE:
+            return response_builder(500, {
+                'error_message': 'Internal Server Error'
+            })
     except AuthleteApiError as e:
         logger.error(e)
         return response_builder(500, {
             'error_message': 'Internal Server Error'
+        })
+    except ValidationError as e:
+        return response_builder(e.status_code, {
+            'error_message': e.message
         })
     return response_builder(200, authrazition_issue_response)

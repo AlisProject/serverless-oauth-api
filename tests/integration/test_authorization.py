@@ -43,7 +43,7 @@ class TestAuthorization(object):
         assert response.status_code == 200
         assert 'authorizationCode' in data
 
-    def test_return_400_invalid_jwt(self, endpoint):
+    def test_return_401_invalid_jwt(self, endpoint):
         id_token = 'xxxxxx'
         response = requests.post(
             endpoint + '/authorization',
@@ -62,7 +62,7 @@ class TestAuthorization(object):
             }
         )
         data = response.json()
-        assert response.status_code == 400
+        assert response.status_code == 401
         assert data['error_message'] == 'invalid jwt token'
 
     def test_return_400_authlete_param_error(self, endpoint):
