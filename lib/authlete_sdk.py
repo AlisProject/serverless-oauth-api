@@ -9,6 +9,7 @@ from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL, API_DOMAIN, INTROSPE
 from lib.settings import AUTHLETE_INTROSPECTION_URL, AUTHLETE_INTROSPECTION_SUCCESS_CODE
 from lib.settings import AUTHLETE_USERINFO_URL, AUTHLETE_TOKEN_URL, AUTHLETE_USERINFO_SUCCESS_CODE
 from lib.settings import AUTHLETE_ACCESS_TOKEN_SUCCESS_CODE, AUTHLETE_REFRESH_TOKEN_SUCCESS_CODE
+from lib.settings import AUTHLETE_CLIENT_INFO_URL
 
 
 class AuthleteSdk():
@@ -156,6 +157,28 @@ class AuthleteSdk():
             'client_secret': client_secret
         }
 
+    def get_clientid_and_clientsecret(self, headers, body):
+        try:
+            return self.get_clientid_and_clientsecret_from_basic_header(
+                headers=headers
+            )
+        except ValidationError:
+            body = parse_qs(body)
+            client_id = body.get('client_id', [None])[0]
+            if client_id is None:
+                raise ValidationError(
+                    status_code=400,
+                    message='Missing client_id'
+                )
+            if self.get_client_type(client_id) == 'CONFIDENTIAL':
+                raise ValidationError(
+                    status_code=400,
+                    message='Missing client_secret'
+                )
+            return {
+                'client_id': client_id
+            }
+
     def get_user_info(self, access_token):
         response = requests.post(
             url=AUTHLETE_USERINFO_URL,
@@ -180,20 +203,31 @@ class AuthleteSdk():
 
         return json.loads(user_info['responseContent'])
 
-    def get_access_token(self, body, client_id=None, client_secret=None):
-        body = parse_qs(body)
-        print(body)
-        request_parameters = {}
-        client_id = body.get('client_id', [None])[0] if client_id is None else client_id
+    def get_client_type(self, client_id):
+        response = requests.get(
+            url=AUTHLETE_CLIENT_INFO_URL + '/' + client_id,
+            auth=(self.api_key, self.api_secret)
+        )
 
-        if client_id is not None:
-            request_parameters['clientId'] = client_id
+        if response.status_code != 200:
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_USERINFO_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
+
+        client_info = json.loads(response.text)
+        return client_info['clientType']
+
+    def get_access_token(self, body, client_id, client_secret=None):
+        body = parse_qs(body)
+        request_parameters = {
+            'clientId': client_id
+        }
 
         if client_secret is not None:
             request_parameters['clientSecret'] = client_secret
 
-        print(request_parameters)
-        print(body.get('grant_type', [None])[0])
         if body.get('grant_type', [None])[0] == 'authorization_code':
             parameters = 'grant_type=authorization_code&code=%s&redirect_uri=%s&code_verifier=%s' % (body.get('code', [''])[0], body.get('redirect_uri', [''])[0], body.get('code_verifier', [''])[0])
             request_parameters['parameters'] = parameters

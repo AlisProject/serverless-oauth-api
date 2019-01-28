@@ -11,13 +11,14 @@ def handler(event, context):
             api_key=os.environ['AUTHLETE_API_KEY'],
             api_secret=os.environ['AUTHLETE_API_SECRET']
         )
-        try:
-            data = authlete.get_clientid_and_clientsecret_from_basic_header(
-                headers=event['headers']
-                )
-        except ValidationError:
+        data = authlete.get_clientid_and_clientsecret(
+            headers=event['headers'],
+            body=event['body']
+        )
+        if data.get('client_secret') is None:
             token = authlete.get_access_token(
-                body=event['body']
+                body=event['body'],
+                client_id=data['client_id']
             )
             return response_builder(200, token)
 

@@ -3,6 +3,7 @@ AUTHLETE_INTROSPECTION_URL = 'https://api.authlete.com/api/auth/introspection/st
 AUTHLETE_JWK_INFORMATION_URL = 'https://api.authlete.com/api/service/jwks/get'
 AUTHLETE_USERINFO_URL = 'https://api.authlete.com/api/auth/userinfo/issue'
 AUTHLETE_TOKEN_URL = 'https://api.authlete.com/api/auth/token'
+AUTHLETE_CLIENT_INFO_URL = 'https://api.authlete.com/api/client/get'
 
 AUTHLETE_INTROSPECTION_SUCCESS_CODE = 'A145001'
 AUTHLETE_USERINFO_SUCCESS_CODE = 'A096001'
