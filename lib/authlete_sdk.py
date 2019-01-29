@@ -186,22 +186,22 @@ class AuthleteSdk():
             data={'token': access_token}
         )
 
+        user_info = json.loads(response.text)
         if response.status_code != 200:
             raise AuthleteApiError(
                 endpoint=AUTHLETE_USERINFO_URL,
                 status_code=response.status_code,
-                message=response.text
+                message=user_info.get('resultMessage')
             )
 
-        user_info = json.loads(response.text)
         if user_info['resultCode'] != AUTHLETE_USERINFO_SUCCESS_CODE:
             raise AuthleteApiError(
                 endpoint=AUTHLETE_USERINFO_URL,
                 status_code=401,
-                message=user_info['resultMessage']
+                message=user_info.get('resultMessage')
             )
 
-        return json.loads(user_info['responseContent'])
+        return json.loads(user_info.get('responseContent'))
 
     def get_client_type(self, client_id):
         response = requests.get(
@@ -209,17 +209,35 @@ class AuthleteSdk():
             auth=(self.api_key, self.api_secret)
         )
 
+        client_info = json.loads(response.text)
         if response.status_code != 200:
             raise AuthleteApiError(
-                endpoint=AUTHLETE_USERINFO_URL,
+                endpoint=AUTHLETE_CLIENT_INFO_URL,
                 status_code=response.status_code,
-                message=response.text
+                message=client_info.get('resultMessage')
             )
 
         client_info = json.loads(response.text)
+        if client_info.get('resultCode') in AUTHLETE_ERROR_400_LIST:
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_CLIENT_INFO_URL,
+                status_code=400,
+                message=client_info.get('resultMessage')
+            )
+        else:
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_CLIENT_INFO_URL,
+                status_code=500,
+                message=client_info.get('resultMessage')
+            )
+
         return client_info['clientType']
 
-    def get_access_token(self, body, client_id, client_secret=None):
+    def get_grant_type(self, body):
+        body = parse_qs(body)
+        return body.get('grant_type', [None])[0]
+
+    def get_access_token_from_refresh_token(self, body, client_id, client_secret=None):
         body = parse_qs(body)
         request_parameters = {
             'clientId': client_id
@@ -228,29 +246,54 @@ class AuthleteSdk():
         if client_secret is not None:
             request_parameters['clientSecret'] = client_secret
 
-        if body.get('grant_type', [None])[0] == 'authorization_code':
-            parameters = 'grant_type=authorization_code&code=%s&redirect_uri=%s&code_verifier=%s' % (body.get('code', [''])[0], body.get('redirect_uri', [''])[0], body.get('code_verifier', [''])[0])
-            request_parameters['parameters'] = parameters
-            print(request_parameters)
-            response = requests.post(
-                url=AUTHLETE_TOKEN_URL,
-                auth=(self.api_key, self.api_secret),
-                data=request_parameters
-            )
-        elif body.get('grant_type', [None])[0] == 'refresh_token':
-            parameters = 'grant_type=refresh_token&refresh_token=%s' % body.get('refresh_token', [''])[0]
-            request_parameters['parameters'] = parameters
-            response = requests.post(
-                url=AUTHLETE_TOKEN_URL,
-                auth=(self.api_key, self.api_secret),
-                data=request_parameters
-            )
-        else:
-            raise ValidationError(
-                status_code=400,
-                message='Invalid grant_type'
+        request_parameters['parameters'] = 'grant_type=refresh_token&refresh_token=%s' % body.get('refresh_token', [''])[0]
+        response = requests.post(
+            url=AUTHLETE_TOKEN_URL,
+            auth=(self.api_key, self.api_secret),
+            data=request_parameters
+        )
+
+        token_info = json.loads(response.text)
+        if response.status_code != 200:
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_TOKEN_URL,
+                status_code=response.status_code,
+                message=token_info.get('resultMessage')
             )
 
+        if token_info.get('resultCode') != AUTHLETE_REFRESH_TOKEN_SUCCESS_CODE:
+            if token_info.get('resultCode') in AUTHLETE_ERROR_400_LIST:
+                raise AuthleteApiError(
+                    endpoint=AUTHLETE_TOKEN_URL,
+                    status_code=400,
+                    message=token_info.get('resultMessage')
+                )
+            else:
+                raise AuthleteApiError(
+                    endpoint=AUTHLETE_TOKEN_URL,
+                    status_code=500,
+                    message=token_info.get('resultMessage')
+                )
+        return json.loads(token_info.get('responseContent'))
+
+    def get_access_token_from_code(self, body, client_id, client_secret=None):
+        body = parse_qs(body)
+        request_parameters = {
+            'clientId': client_id
+        }
+
+        if client_secret is not None:
+            request_parameters['clientSecret'] = client_secret
+
+        request_parameters['parameters'] = 'grant_type=authorization_code&code=%s&redirect_uri=%s&code_verifier=%s' % (body.get('code', [''])[0], body.get('redirect_uri', [''])[0], body.get('code_verifier', [''])[0])
+        response = requests.post(
+            url=AUTHLETE_TOKEN_URL,
+            auth=(self.api_key, self.api_secret),
+            data=request_parameters
+        )
+
+        print(response.status_code)
+        print(response.text)
         if response.status_code != 200:
             raise AuthleteApiError(
                 endpoint=AUTHLETE_TOKEN_URL,
@@ -259,19 +302,17 @@ class AuthleteSdk():
             )
 
         token_info = json.loads(response.text)
-
-        if token_info['resultCode'] != AUTHLETE_ACCESS_TOKEN_SUCCESS_CODE and \
-                token_info['resultCode'] != AUTHLETE_REFRESH_TOKEN_SUCCESS_CODE:
-            if token_info['resultCode'] in AUTHLETE_ERROR_400_LIST:
+        if token_info.get('resultCode') != AUTHLETE_ACCESS_TOKEN_SUCCESS_CODE:
+            if token_info.get('resultCode') in AUTHLETE_ERROR_400_LIST:
                 raise AuthleteApiError(
                     endpoint=AUTHLETE_TOKEN_URL,
                     status_code=400,
-                    message=token_info['resultMessage']
+                    message=token_info.get('resultMessage')
                 )
             else:
                 raise AuthleteApiError(
                     endpoint=AUTHLETE_TOKEN_URL,
                     status_code=500,
-                    message=token_info['resultMessage']
+                    message=token_info.get('resultMessage')
                 )
-        return json.loads(token_info['responseContent'])
+        return json.loads(token_info.get('responseContent'))

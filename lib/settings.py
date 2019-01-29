@@ -11,6 +11,7 @@ AUTHLETE_ACCESS_TOKEN_SUCCESS_CODE = 'A050001'
 AUTHLETE_REFRESH_TOKEN_SUCCESS_CODE = 'A053001'
 
 AUTHLETE_ERROR_400_LIST = [
+    'A027201',  # client_idが不正
     'A049302',  # grant_typeが空
     'A049304',  # grant_typeが不正な値
     'A050302',  # codeが空
