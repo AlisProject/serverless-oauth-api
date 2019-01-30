@@ -2,6 +2,7 @@ import decimal
 import json
 import logging
 import os
+import re
 import time
 import urllib.request
 from jose import jwk, jwt
@@ -67,6 +68,21 @@ def verify_jwt_token(token):
         if time.time() > claims['exp']:
             return False
     except Exception:
+        return False
+    return True
+
+def verify_scope_parameter(scope_str):
+    # スペースで区切られた2つの値が指定されており、
+    # 一つはopenidでもう一つはreadかwriteが指定されていることをチェックする
+    scope_str = re.sub(r'^\s+', '', scope_str)
+    scope_str = re.sub(r'\s+$', '', scope_str)
+    scopes = re.split(r'\s+', scope_str)
+    if len(scopes) != 2:
+        return False
+    if not 'openid' in scopes:
+        return False
+    scopes.remove('openid')
+    if scopes[0] != 'read' and scopes[0] != 'write':
         return False
     return True
 

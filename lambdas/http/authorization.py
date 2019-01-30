@@ -16,7 +16,7 @@ from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_REDIRECT_URI_IS_NOT_REGIST
 from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_RESPONSE_TYPE_IS_INVALID
 from lib.settings import AUTHLETE_AUTHORIZATION_SUCCESS_CODE
 from lib.settings import AUTHLETE_AUTHORIZATION_ISSUE_SUBJECT_DOES_NOT_CONTAIN
-from lib.utils import response_builder, logger, verify_jwt_token, get_access_token_from_header
+from lib.utils import response_builder, logger, verify_jwt_token, get_access_token_from_header, verify_scope_parameter
 
 
 def handler(event, context):
@@ -33,9 +33,15 @@ def handler(event, context):
         params = urllib.parse.parse_qs(event.get('body', ''))
         params['subject'] = [claims['cognito:username']]
         params['sub'] = [claims['sub']]
-        new_params = urllib.parse.urlencode(params, doseq=True)
+        params['scope'] = params.get('scope', ['']) # scopeが無い場合は空配列で初期化
+        params['scope'] = [params['scope'][0]]      # scopeが複数来たら最初だけ使う
+
+        # scopeの検証
+        if not verify_scope_parameter(params['scope'][0]):
+            return response_builder(400, {"error_message": "invalid scope parameter. scope parameter must be 'openid read' or 'openid write'"})
 
         # authrazition API
+        new_params = urllib.parse.urlencode(params, doseq=True)
         authlete = AuthleteSdk(
             api_key=os.environ['AUTHLETE_API_KEY'],
             api_secret=os.environ['AUTHLETE_API_SECRET']

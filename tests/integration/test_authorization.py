@@ -86,3 +86,47 @@ class TestAuthorization(object):
         data = response.json()
         assert response.status_code == 400
         assert data['resultMessage'].find("No client has the client ID") > -1
+
+    def test_return_400_scope_error(self, endpoint):
+        id_token = self.__get_id_token()
+        # scopeにread or writeが無い
+        response1 = requests.post(
+            endpoint + '/authorization',
+            headers={
+                'Authorization': f'Bearer {id_token}'
+            },
+            data={
+                'response_type': 'code',
+                'client_id': os.environ['TEST_AUTHLETE_CLIENT_ID'],
+                'redirect_uri': 'http://localhost',
+                'scope': 'openid hoge',
+                'code_challenge': 'hcCb3gToI1GPZeS_SIYWvaNT_5u0GB1oqOGQJqRKMSE',
+                'code_challenge_method': 'S256',
+                'subject': 'fugafuga',
+                'sub': 'hogehgoe'
+            }
+        )
+        data1 = response1.json()
+        assert response1.status_code == 400
+        assert data1['error_message'].find("invalid scope parameter") > -1
+
+        # scopeにopenidが無い
+        response2 = requests.post(
+            endpoint + '/authorization',
+            headers={
+                'Authorization': f'Bearer {id_token}'
+            },
+            data={
+                'response_type': 'code',
+                'client_id': os.environ['TEST_AUTHLETE_CLIENT_ID'],
+                'redirect_uri': 'http://localhost',
+                'scope': 'hoge write',
+                'code_challenge': 'hcCb3gToI1GPZeS_SIYWvaNT_5u0GB1oqOGQJqRKMSE',
+                'code_challenge_method': 'S256',
+                'subject': 'fugafuga',
+                'sub': 'hogehgoe'
+            }
+        )
+        data2 = response2.json()
+        assert response2.status_code == 400
+        assert data2['error_message'].find("invalid scope parameter") > -1
