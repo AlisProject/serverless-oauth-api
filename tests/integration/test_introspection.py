@@ -1,12 +1,15 @@
 import requests
-import boto3
-import os
-import json
-from .common import get_access_token
+from .common import get_access_token, get_code_verifier, get_code_challenge
+
 
 class TestIntrospection(object):
     def setup(self):
-        self.access_token = get_access_token()
+        self.code_verifier = get_code_verifier()
+        self.code_challenge = get_code_challenge(self.code_verifier)
+        self.access_token = get_access_token(
+            code_verifier=self.code_verifier,
+            code_challenge=self.code_challenge
+        )
 
     def test_return_200_with_success(self, endpoint):
         response = requests.post(

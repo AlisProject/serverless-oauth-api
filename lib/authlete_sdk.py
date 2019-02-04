@@ -292,8 +292,6 @@ class AuthleteSdk():
             data=request_parameters
         )
 
-        print(response.status_code)
-        print(response.text)
         if response.status_code != 200:
             raise AuthleteApiError(
                 endpoint=AUTHLETE_TOKEN_URL,
