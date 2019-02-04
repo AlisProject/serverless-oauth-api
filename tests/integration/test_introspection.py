@@ -1,12 +1,17 @@
 import requests
-from .common import get_access_token, get_code_verifier, get_code_challenge
+import os
+from .common import AuthleteSDKForTest
+authlete_test_sdk = AuthleteSDKForTest(
+    client_id=os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'],
+    client_secret=os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_SECRET']
+)
 
 
 class TestIntrospection(object):
     def setup(self):
-        self.code_verifier = get_code_verifier()
-        self.code_challenge = get_code_challenge(self.code_verifier)
-        self.access_token = get_access_token(
+        self.code_verifier = authlete_test_sdk.get_code_verifier()
+        self.code_challenge = authlete_test_sdk.get_code_challenge(self.code_verifier)
+        self.access_token = authlete_test_sdk.get_access_token(
             code_verifier=self.code_verifier,
             code_challenge=self.code_challenge
         )

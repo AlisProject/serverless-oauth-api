@@ -1,23 +1,25 @@
 import requests
 import os
 import base64
-from .common import get_authorization_code, get_token_for_client_authentication
-from .common import get_code_verifier, get_code_challenge
-from .common import get_refresh_token
+from .common import AuthleteSDKForTest
+authlete_test_sdk = AuthleteSDKForTest(
+    client_id=os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'],
+    client_secret=os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_SECRET']
+)
 
 
 class TestToken(object):
     def setup(self):
-        self.code_verifier = get_code_verifier()
-        self.code_challenge = get_code_challenge(self.code_verifier)
-        self.authorization_code = get_authorization_code(self.code_challenge)
+        self.code_verifier = authlete_test_sdk.get_code_verifier()
+        self.code_challenge = authlete_test_sdk.get_code_challenge(self.code_verifier)
+        self.authorization_code = authlete_test_sdk.get_authorization_code(self.code_challenge)
 
     def test_return_200_with_authorization_code(self, endpoint):
         response = requests.post(
             url=endpoint + '/token',
             headers={
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic ' + get_token_for_client_authentication()
+                'Authorization': 'Basic ' + authlete_test_sdk.get_token_for_client_authentication()
             },
             data='grant_type=authorization_code&code='+self.authorization_code+'&redirect_uri=http://localhost&code_verifier='+self.code_verifier
         )
@@ -32,7 +34,7 @@ class TestToken(object):
         assert 'expires_in' in data
 
     def test_return_200_with_refresh_token(self, endpoint):
-        refresh_token = get_refresh_token(
+        refresh_token = authlete_test_sdk.get_refresh_token(
             code_verifier=self.code_verifier,
             code_challenge=self.code_challenge
         )
@@ -40,7 +42,7 @@ class TestToken(object):
             url=endpoint + '/token',
             headers={
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+get_token_for_client_authentication()
+                'Authorization': 'Basic '+authlete_test_sdk.get_token_for_client_authentication()
             },
             data='grant_type=refresh_token&refresh_token='+refresh_token
         )
@@ -58,7 +60,7 @@ class TestToken(object):
             url=endpoint + '/token',
             headers={
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+get_token_for_client_authentication()
+                'Authorization': 'Basic '+authlete_test_sdk.get_token_for_client_authentication()
             },
             data='grant_type=authorization_code&redirect_uri=http://localhost&code_verifier='+self.code_verifier
         )
@@ -71,7 +73,7 @@ class TestToken(object):
             url=endpoint + '/token',
             headers={
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+get_token_for_client_authentication()
+                'Authorization': 'Basic '+authlete_test_sdk.get_token_for_client_authentication()
             },
             data='grant_type=authorization_code&code=xxxxxx&redirect_uri=http://localhost&code_verifier='+self.code_verifier
         )
@@ -84,7 +86,7 @@ class TestToken(object):
             url=endpoint + '/token',
             headers={
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+get_token_for_client_authentication()
+                'Authorization': 'Basic '+authlete_test_sdk.get_token_for_client_authentication()
             },
             data='grant_type=authorization_code&code='+self.authorization_code+'&redirect_uri=http://example.com&code_verifier='+self.code_verifier
         )
@@ -97,7 +99,7 @@ class TestToken(object):
             url=endpoint + '/token',
             headers={
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+get_token_for_client_authentication()
+                'Authorization': 'Basic '+authlete_test_sdk.get_token_for_client_authentication()
             },
             data='grant_type=xxxxxx&code='+self.authorization_code+'&redirect_uri=http://localhost&code_verifier='+self.code_verifier
         )
@@ -110,7 +112,7 @@ class TestToken(object):
             url=endpoint + '/token',
             headers={
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+get_token_for_client_authentication()
+                'Authorization': 'Basic '+authlete_test_sdk.get_token_for_client_authentication()
             },
             data='grant_type=authorization_code&code='+self.authorization_code+'&redirect_uri=http://localhost&code_verifier=xxxxxxx'
         )
@@ -132,7 +134,7 @@ class TestToken(object):
         assert error['error_message'] == 'Missing client_id'
 
     def test_return_400_with_invalid_client_secret(self, endpoint):
-        basicauth_str = os.environ['TEST_AUTHLETE_CLIENT_ID'] + ':xxxxxxx'
+        basicauth_str = os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'] + ':xxxxxxx'
         basic_auth = base64.b64encode(basicauth_str.encode('utf-8')).decode('UTF-8')
         response = requests.post(
             url=endpoint + '/token',
