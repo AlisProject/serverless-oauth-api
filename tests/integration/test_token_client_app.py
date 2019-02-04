@@ -3,12 +3,11 @@ import os
 import base64
 from .common import AuthleteSDKForTest
 authlete_test_sdk = AuthleteSDKForTest(
-    client_id=os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'],
-    client_secret=os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_SECRET']
+    client_id=os.environ['TEST_AUTHLETE_CLIENT_APP_CLIENT_ID']
 )
 
 
-class TestToken(object):
+class TestTokenClientApp(object):
     def setup(self):
         self.code_verifier = authlete_test_sdk.get_code_verifier()
         self.code_challenge = authlete_test_sdk.get_code_challenge(self.code_verifier)
@@ -18,10 +17,9 @@ class TestToken(object):
         response = requests.post(
             url=endpoint + '/token',
             headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic ' + authlete_test_sdk.get_token_for_client_authentication()
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            data='grant_type=authorization_code&code='+self.authorization_code+'&redirect_uri=http://localhost&code_verifier='+self.code_verifier
+            data='grant_type=authorization_code&code='+self.authorization_code+'&redirect_uri=http://localhost&code_verifier='+self.code_verifier+'&client_id='+os.environ['TEST_AUTHLETE_CLIENT_APP_CLIENT_ID']
         )
         assert response.status_code == 200
 
@@ -41,10 +39,9 @@ class TestToken(object):
         response = requests.post(
             url=endpoint + '/token',
             headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+authlete_test_sdk.get_token_for_client_authentication()
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            data='grant_type=refresh_token&refresh_token='+refresh_token
+            data='grant_type=refresh_token&refresh_token='+refresh_token+'&client_id='+os.environ['TEST_AUTHLETE_CLIENT_APP_CLIENT_ID']
         )
         assert response.status_code == 200
 
@@ -59,10 +56,9 @@ class TestToken(object):
         response = requests.post(
             url=endpoint + '/token',
             headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+authlete_test_sdk.get_token_for_client_authentication()
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            data='grant_type=authorization_code&redirect_uri=http://localhost&code_verifier='+self.code_verifier
+            data='grant_type=authorization_code&redirect_uri=http://localhost&code_verifier='+self.code_verifier+'&client_id='+os.environ['TEST_AUTHLETE_CLIENT_APP_CLIENT_ID']
         )
         assert response.status_code == 400
         error = response.json()
@@ -72,10 +68,9 @@ class TestToken(object):
         response = requests.post(
             url=endpoint + '/token',
             headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+authlete_test_sdk.get_token_for_client_authentication()
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            data='grant_type=authorization_code&code=xxxxxx&redirect_uri=http://localhost&code_verifier='+self.code_verifier
+            data='grant_type=authorization_code&code=xxxxx&redirect_uri=http://localhost&code_verifier='+self.code_verifier+'&client_id='+os.environ['TEST_AUTHLETE_CLIENT_APP_CLIENT_ID']
         )
         assert response.status_code == 400
         error = response.json()
@@ -85,10 +80,9 @@ class TestToken(object):
         response = requests.post(
             url=endpoint + '/token',
             headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+authlete_test_sdk.get_token_for_client_authentication()
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            data='grant_type=authorization_code&code='+self.authorization_code+'&redirect_uri=http://example.com&code_verifier='+self.code_verifier
+            data='grant_type=authorization_code&code='+self.authorization_code+'&redirect_uri=http://example.com&code_verifier='+self.code_verifier+'&client_id='+os.environ['TEST_AUTHLETE_CLIENT_APP_CLIENT_ID']
         )
         assert response.status_code == 400
         error = response.json()
@@ -98,10 +92,9 @@ class TestToken(object):
         response = requests.post(
             url=endpoint + '/token',
             headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+authlete_test_sdk.get_token_for_client_authentication()
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            data='grant_type=xxxxxx&code='+self.authorization_code+'&redirect_uri=http://localhost&code_verifier='+self.code_verifier
+            data='grant_type=xxxxx&code='+self.authorization_code+'&redirect_uri=http://localhost&code_verifier='+self.code_verifier+'&client_id='+os.environ['TEST_AUTHLETE_CLIENT_APP_CLIENT_ID']
         )
         assert response.status_code == 400
         error = response.json()
@@ -111,39 +104,22 @@ class TestToken(object):
         response = requests.post(
             url=endpoint + '/token',
             headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+authlete_test_sdk.get_token_for_client_authentication()
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            data='grant_type=authorization_code&code='+self.authorization_code+'&redirect_uri=http://localhost&code_verifier=xxxxxxx'
+            data='grant_type=authorization_code&code='+self.authorization_code+'&redirect_uri=http://localhost&code_verifier=xxxxxx&client_id='+os.environ['TEST_AUTHLETE_CLIENT_APP_CLIENT_ID']
         )
         assert response.status_code == 400
         error = response.json()
         assert error['error_message'] == "[A050315] The code challenge value computed with 'code_verifier' is different from 'code_challenge' contained in the authorization request."
 
-    def test_return_400_with_invalid_basic_auth(self, endpoint):
+    def test_return_400_with_missing_client_id(self, endpoint):
         response = requests.post(
             url=endpoint + '/token',
             headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic xxxxxxx'
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
             data='grant_type=authorization_code&code='+self.authorization_code+'&redirect_uri=http://localhost&code_verifier='+self.code_verifier
         )
         assert response.status_code == 400
         error = response.json()
         assert error['error_message'] == 'Missing client_id'
-
-    def test_return_400_with_invalid_client_secret(self, endpoint):
-        basicauth_str = os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'] + ':xxxxxxx'
-        basic_auth = base64.b64encode(basicauth_str.encode('utf-8')).decode('UTF-8')
-        response = requests.post(
-            url=endpoint + '/token',
-            headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic '+basic_auth
-            },
-            data='grant_type=authorization_code&code='+self.authorization_code+'&redirect_uri=http://localhost&code_verifier='+self.code_verifier
-        )
-        assert response.status_code == 400
-        error = response.json()
-        assert error['error_message'] == '[A048311] The client credentials contained in the token request are invalid.'

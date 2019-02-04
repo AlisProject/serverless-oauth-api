@@ -218,19 +218,6 @@ class AuthleteSdk():
             )
 
         client_info = json.loads(response.text)
-        if client_info.get('resultCode') in AUTHLETE_ERROR_400_LIST:
-            raise AuthleteApiError(
-                endpoint=AUTHLETE_CLIENT_INFO_URL,
-                status_code=400,
-                message=client_info.get('resultMessage')
-            )
-        else:
-            raise AuthleteApiError(
-                endpoint=AUTHLETE_CLIENT_INFO_URL,
-                status_code=500,
-                message=client_info.get('resultMessage')
-            )
-
         return client_info['clientType']
 
     def get_grant_type(self, body):
