@@ -116,36 +116,6 @@ class AuthleteSdk():
             )
         return json.loads(result['responseContent'])
 
-    def get_access_token_from_header(self, headers):
-        auth = headers.get('Authorization', None)
-        if not auth:
-            raise ValidationError(
-                status_code=401,
-                message='Missing Authorization header'
-            )
-
-        parts = auth.split()
-
-        if parts[0].lower() != 'bearer':
-            raise ValidationError(
-                status_code=401,
-                message='Authorization header must start with Bearer'
-            )
-
-        elif len(parts) == 1:
-            raise ValidationError(
-                status_code=401,
-                message='Token not found'
-            )
-
-        elif len(parts) > 2:
-            raise ValidationError(
-                status_code=401,
-                message='Authorization header must be Bearer token'
-            )
-
-        return parts[1]
-
     def get_clientid_and_clientsecret_from_basic_header(self, headers):
         auth = headers.get('Authorization', None)
         if not auth:
@@ -331,4 +301,3 @@ class AuthleteSdk():
                     message=token_info.get('resultMessage')
                 )
         return json.loads(token_info.get('responseContent'))
-

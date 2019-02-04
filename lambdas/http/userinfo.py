@@ -3,7 +3,7 @@ import os
 from lib.authlete_sdk import AuthleteSdk
 from lib.exceptions import AuthleteApiError, ValidationError
 from lib.cognito_user_pool import CognitoUserPool
-from lib.utils import response_builder, logger
+from lib.utils import response_builder, logger, get_access_token_from_header
 from botocore.exceptions import ClientError
 
 
@@ -19,7 +19,7 @@ def handler(event, context):
             user_pool_id=os.environ['COGNITO_USER_POOL_ID']
         )
 
-        access_token = authlete.get_access_token_from_header(headers=event['headers'])
+        access_token = get_access_token_from_header(headers=event['headers'])
         response_content = authlete.get_user_info(access_token=access_token)
         sub = congito_user_pool.get_user_sub_value(username=response_content['sub'])
     except ValidationError as e:

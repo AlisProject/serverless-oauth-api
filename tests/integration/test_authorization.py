@@ -1,11 +1,7 @@
 import boto3
-import json
 import os
-import random
 import requests
-import string
-from .common import api_deploy, api_remove, get_endpoint_url
-from .conftest import option
+
 
 class TestAuthorization(object):
     def __get_id_token(self):
@@ -30,7 +26,7 @@ class TestAuthorization(object):
             },
             data={
                 'response_type': 'code',
-                'client_id': os.environ['TEST_AUTHLETE_CLIENT_ID'],
+                'client_id': os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'],
                 'redirect_uri': 'http://localhost',
                 'scope': 'openid read',
                 'code_challenge': 'hcCb3gToI1GPZeS_SIYWvaNT_5u0GB1oqOGQJqRKMSE',
@@ -52,7 +48,7 @@ class TestAuthorization(object):
             },
             data={
                 'response_type': 'code',
-                'client_id': os.environ['TEST_AUTHLETE_CLIENT_ID'],
+                'client_id': os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'],
                 'redirect_uri': 'http://localhost',
                 'scope': 'openid read',
                 'code_challenge': 'hcCb3gToI1GPZeS_SIYWvaNT_5u0GB1oqOGQJqRKMSE',
@@ -97,7 +93,7 @@ class TestAuthorization(object):
             },
             data={
                 'response_type': 'code',
-                'client_id': os.environ['TEST_AUTHLETE_CLIENT_ID'],
+                'client_id': os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'],
                 'redirect_uri': 'http://localhost',
                 'scope': 'openid hoge',
                 'code_challenge': 'hcCb3gToI1GPZeS_SIYWvaNT_5u0GB1oqOGQJqRKMSE',
@@ -118,7 +114,7 @@ class TestAuthorization(object):
             },
             data={
                 'response_type': 'code',
-                'client_id': os.environ['TEST_AUTHLETE_CLIENT_ID'],
+                'client_id': os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'],
                 'redirect_uri': 'http://localhost',
                 'scope': 'hoge write',
                 'code_challenge': 'hcCb3gToI1GPZeS_SIYWvaNT_5u0GB1oqOGQJqRKMSE',
