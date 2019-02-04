@@ -1,12 +1,20 @@
 import requests
-import boto3
 import os
-import json
-from .common import get_access_token
+from .common import AuthleteSDKForTest
+authlete_test_sdk = AuthleteSDKForTest(
+    client_id=os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'],
+    client_secret=os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_SECRET']
+)
+
 
 class TestIntrospection(object):
     def setup(self):
-        self.access_token = get_access_token()
+        self.code_verifier = authlete_test_sdk.get_code_verifier()
+        self.code_challenge = authlete_test_sdk.get_code_challenge(self.code_verifier)
+        self.access_token = authlete_test_sdk.get_access_token(
+            code_verifier=self.code_verifier,
+            code_challenge=self.code_challenge
+        )
 
     def test_return_200_with_success(self, endpoint):
         response = requests.post(
