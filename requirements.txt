@@ -12,6 +12,7 @@ pluggy==0.8.0
 py==1.7.0
 pytest==4.1.0
 python-dateutil==2.7.5
+python-jose==3.0.1     
 PyYAML==3.13
 requests==2.21.0
 s3transfer==0.1.13

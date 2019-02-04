@@ -25,6 +25,13 @@ package:
      - '!lib/**'
 
 functions:
+  authorization:
+    handler: lambdas/http/authorization.handler
+    events:
+      - http:
+          path: /authorization
+          method: post
+          cors: true
   discovery:
     handler: lambdas/http/well_known/openid_configuration.handler
     events:

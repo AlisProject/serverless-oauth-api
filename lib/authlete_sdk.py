@@ -5,6 +5,8 @@ import binascii
 from urllib.parse import parse_qs
 from lib.exceptions import AuthleteApiError, ValidationError
 from lib.settings import AUTHLETE_ERROR_400_LIST, AUTHLETE_JWK_INFORMATION_URL
+from lib.settings import AUTHLETE_AUTHORIZATION_URL
+from lib.settings import AUTHLETE_AUTHORIZATION_ISSUE_URL
 from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL, API_DOMAIN, INTROSPECTION_ENDPOINT
 from lib.settings import AUTHLETE_INTROSPECTION_URL, AUTHLETE_INTROSPECTION_SUCCESS_CODE
 from lib.settings import AUTHLETE_USERINFO_URL, AUTHLETE_TOKEN_URL, AUTHLETE_USERINFO_SUCCESS_CODE
@@ -16,6 +18,34 @@ class AuthleteSdk():
     def __init__(self, api_key, api_secret):
         self.api_key = api_key
         self.api_secret = api_secret
+
+    def authorization_issue_request(self, params):
+        response = requests.post(
+            url=AUTHLETE_AUTHORIZATION_ISSUE_URL,
+            auth=(self.api_key, self.api_secret),
+            data=params
+        )
+        if response.status_code is not 200:
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_AUTHORIZATION_ISSUE_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
+        return json.loads(response.text)
+
+    def authorization_request(self, params):
+        response = requests.post(
+            url=AUTHLETE_AUTHORIZATION_URL,
+            auth=(self.api_key, self.api_secret),
+            data={'parameters': params}
+        )
+        if response.status_code is not 200:
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_AUTHORIZATION_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
+        return json.loads(response.text)
 
     def get_openid_configuration(self):
         response = requests.get(
@@ -301,3 +331,4 @@ class AuthleteSdk():
                     message=token_info.get('resultMessage')
                 )
         return json.loads(token_info.get('responseContent'))
+
