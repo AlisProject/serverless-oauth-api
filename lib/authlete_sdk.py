@@ -204,6 +204,17 @@ class AuthleteSdk():
 
         return json.loads(user_info.get('responseContent'))
 
+    def get_owner_of_client_id(self, client_id):
+        response = requests.get(
+            url=AUTHLETE_CLIENT_INFO_URL + '/' + client_id,
+            auth=(self.api_key, self.api_secret)
+        )
+
+        if response.status_code != 200:
+            return {'developer': ''}
+
+        return json.loads(response.text).get('developer')
+
     def get_client_type(self, client_id):
         response = requests.get(
             url=AUTHLETE_CLIENT_INFO_URL + '/' + client_id,
@@ -218,8 +229,7 @@ class AuthleteSdk():
                 message=strip_authlete_code(client_info.get('resultMessage'))
             )
 
-        client_info = json.loads(response.text)
-        return client_info['clientType']
+        return json.loads(response.text).get('clientType')
 
     def get_grant_type(self, body):
         body = parse_qs(body)

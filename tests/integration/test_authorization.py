@@ -7,14 +7,14 @@ class TestAuthorization(object):
     def __get_id_token(self):
         client = boto3.client('cognito-idp')
         result = client.admin_initiate_auth(
-                UserPoolId = os.environ['TEST_COGNITO_USER_POOL_ID'],
-                ClientId = os.environ['TEST_COGNITO_CLIENT_ID'],
-                AuthFlow = "ADMIN_NO_SRP_AUTH",
-                AuthParameters = {
+                UserPoolId=os.environ['TEST_COGNITO_USER_POOL_ID'],
+                ClientId=os.environ['TEST_COGNITO_CLIENT_ID'],
+                AuthFlow="ADMIN_NO_SRP_AUTH",
+                AuthParameters={
                     "USERNAME": os.environ['TEST_COGNITO_USER_ID'],
                     "PASSWORD": os.environ['TEST_COGNITO_USER_PASSWORD']
-                    }
-                )
+                }
+        )
         return result['AuthenticationResult']['IdToken']
 
     def test_return_200(self, endpoint):
@@ -61,7 +61,7 @@ class TestAuthorization(object):
         assert response.status_code == 401
         assert data['error_message'] == 'invalid jwt token'
 
-    def test_return_400_authlete_param_error(self, endpoint):
+    def test_return_400_with_others_client_id(self, endpoint):
         id_token = self.__get_id_token()
         response = requests.post(
             endpoint + '/authorization',
@@ -70,7 +70,7 @@ class TestAuthorization(object):
             },
             data={
                 'response_type': 'code',
-                'client_id': '12345',
+                'client_id': '10764185707121',
                 'redirect_uri': 'http://localhost',
                 'scope': 'openid read',
                 'code_challenge': 'hcCb3gToI1GPZeS_SIYWvaNT_5u0GB1oqOGQJqRKMSE',
@@ -81,7 +81,29 @@ class TestAuthorization(object):
         )
         data = response.json()
         assert response.status_code == 400
-        assert data['error_message'].find("No client has the client ID") > -1
+        assert data['error_message'] == 'Invalid client_id.'
+
+    def test_return_400_authlete_param_error(self, endpoint):
+        id_token = self.__get_id_token()
+        response = requests.post(
+            endpoint + '/authorization',
+            headers={
+                'Authorization': f'Bearer {id_token}'
+            },
+            data={
+                'response_type': 'test',
+                'client_id': os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'],
+                'redirect_uri': 'http://localhost',
+                'scope': 'openid read',
+                'code_challenge': 'hcCb3gToI1GPZeS_SIYWvaNT_5u0GB1oqOGQJqRKMSE',
+                'code_challenge_method': 'S256',
+                'subject': 'fugafuga',
+                'sub': 'hogehgoe'
+            }
+        )
+        data = response.json()
+        assert response.status_code == 400
+        assert data['error_message'] == "The value of 'response_type' parameter contained in the authorization request is invalid."
 
     def test_return_400_scope_error(self, endpoint):
         id_token = self.__get_id_token()
