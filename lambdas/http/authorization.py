@@ -45,6 +45,7 @@ def handler(event, context):
 
         # authrazition API
         new_params = urllib.parse.urlencode(params, doseq=True)
+
         if urllib.parse.parse_qs(new_params).get('code_challenge_method') is None:
             return response_builder(400, {
                 'error_message': "The authorization request does not contain 'code_challenge_method' parameter."
@@ -54,14 +55,6 @@ def handler(event, context):
             api_key=os.environ['AUTHLETE_API_KEY'],
             api_secret=os.environ['AUTHLETE_API_SECRET']
         )
-
-        # developerの検証
-        if claims['cognito:username'] != authlete.get_owner_of_client_id(
-                client_id=urllib.parse.parse_qs(new_params).get('client_id')[0]):
-            return response_builder(400, {
-                'error_message': "Invalid client_id."
-            })
-
         authrazition_response = authlete.authorization_request(new_params)
         AUTHORIZATION_ERROR_CODES = [
             AUTHLETE_AUTHORIZATION_ERROR_CLIENT_ID_IS_NOT_FOUND
