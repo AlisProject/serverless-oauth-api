@@ -62,7 +62,7 @@ class TestTokenClientApp(object):
         )
         assert response.status_code == 400
         error = response.json()
-        assert error['error_message'] == "[A050302] The value of 'code' in the token request is empty."
+        assert error['error_message'] == "The value of 'code' in the token request is empty."
 
     def test_return_400_with_invalid_code(self, endpoint):
         response = requests.post(
@@ -74,7 +74,7 @@ class TestTokenClientApp(object):
         )
         assert response.status_code == 400
         error = response.json()
-        assert error['error_message'] == '[A050305] No such authorization code.'
+        assert error['error_message'] == 'No such authorization code.'
 
     def test_return_400_with_invalid_redirect_uri(self, endpoint):
         response = requests.post(
@@ -86,7 +86,7 @@ class TestTokenClientApp(object):
         )
         assert response.status_code == 400
         error = response.json()
-        assert error['error_message'] == '[A050309] The redirect URI contained in the token request does not match the one which was specified when the authorization code was created.'
+        assert error['error_message'] == 'The redirect URI contained in the token request does not match the one which was specified when the authorization code was created.'
 
     def test_return_400_with_invalid_grant_type(self, endpoint):
         response = requests.post(
@@ -110,7 +110,7 @@ class TestTokenClientApp(object):
         )
         assert response.status_code == 400
         error = response.json()
-        assert error['error_message'] == "[A050315] The code challenge value computed with 'code_verifier' is different from 'code_challenge' contained in the authorization request."
+        assert error['error_message'] == "The code challenge value computed with 'code_verifier' is different from 'code_challenge' contained in the authorization request."
 
     def test_return_400_with_missing_client_id(self, endpoint):
         response = requests.post(

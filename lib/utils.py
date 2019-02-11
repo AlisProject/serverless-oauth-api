@@ -11,6 +11,11 @@ from lib.exceptions import ValidationError
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
+def strip_authlete_code(message):
+    return re.sub(r"\[\w+\] ", '', message)
+
+
 def get_access_token_from_header(headers):
     auth = headers.get('Authorization', None)
     if not auth:
@@ -41,11 +46,13 @@ def get_access_token_from_header(headers):
 
     return parts[1]
 
+
 def response_builder(status_code, body={}):
     return {
         'statusCode': status_code,
         'body': json.dumps(body, cls=DecimalEncoder)
     }
+
 
 def verify_jwt_token(token):
     try:
@@ -71,6 +78,7 @@ def verify_jwt_token(token):
         return False
     return True
 
+
 def verify_scope_parameter(scope_str):
     # スペースで区切られた2つの値が指定されており、
     # 一つはopenidでもう一つはreadかwriteが指定されていることをチェックする
@@ -85,6 +93,7 @@ def verify_scope_parameter(scope_str):
     if scopes[0] != 'read' and scopes[0] != 'write':
         return False
     return True
+
 
 class DecimalEncoder(json.JSONEncoder):
     def default(self, obj):

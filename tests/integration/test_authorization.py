@@ -37,7 +37,7 @@ class TestAuthorization(object):
         )
         data = response.json()
         assert response.status_code == 200
-        assert 'authorizationCode' in data
+        assert 'redirect_uri' in data
 
     def test_return_401_invalid_jwt(self, endpoint):
         id_token = 'xxxxxx'
@@ -81,7 +81,7 @@ class TestAuthorization(object):
         )
         data = response.json()
         assert response.status_code == 400
-        assert data['resultMessage'].find("No client has the client ID") > -1
+        assert data['error_message'].find("No client has the client ID") > -1
 
     def test_return_400_scope_error(self, endpoint):
         id_token = self.__get_id_token()

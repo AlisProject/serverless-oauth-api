@@ -16,7 +16,7 @@ from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_REDIRECT_URI_IS_NOT_REGIST
 from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_RESPONSE_TYPE_IS_INVALID
 from lib.settings import AUTHLETE_AUTHORIZATION_SUCCESS_CODE
 from lib.settings import AUTHLETE_AUTHORIZATION_ISSUE_SUBJECT_DOES_NOT_CONTAIN
-from lib.utils import response_builder, logger, verify_jwt_token, get_access_token_from_header, verify_scope_parameter
+from lib.utils import response_builder, logger, verify_jwt_token, get_access_token_from_header, verify_scope_parameter, strip_authlete_code
 
 
 def handler(event, context):
@@ -60,7 +60,9 @@ def handler(event, context):
             ,AUTHLETE_AUTHORIZATION_SUCCESS_CODE
         ]
         if authrazition_response['resultCode'] in AUTHORIZATION_ERROR_CODES:
-            return response_builder(400, authrazition_response)
+            return response_builder(400, {
+                'error_message': strip_authlete_code(authrazition_response['resultMessage'])
+            })
 
         # authorization issue API
         authrazition_issue_response = authlete.authorization_issue_request({
@@ -69,7 +71,9 @@ def handler(event, context):
             "sub": claims['sub']
         })
         if authrazition_issue_response['resultCode'] == AUTHLETE_AUTHORIZATION_ISSUE_SUBJECT_DOES_NOT_CONTAIN:
-            return response_builder(400, authrazition_response)
+            return response_builder(400, {
+                'error_message': strip_authlete_code(authrazition_response['resultMessage'])
+            })
         if authrazition_issue_response['resultCode'] != AUTHLETE_AUTHORIZATION_SUCCESS_CODE:
             return response_builder(500, {
                 'error_message': 'Internal Server Error'
@@ -83,4 +87,6 @@ def handler(event, context):
         return response_builder(e.status_code, {
             'error_message': e.message
         })
-    return response_builder(200, authrazition_issue_response)
+    return response_builder(200, {
+        'redirect_uri': authrazition_issue_response['responseContent']
+    })
