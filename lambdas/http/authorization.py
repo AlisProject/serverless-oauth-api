@@ -42,6 +42,12 @@ def handler(event, context):
 
         # authrazition API
         new_params = urllib.parse.urlencode(params, doseq=True)
+
+        if urllib.parse.parse_qs(new_params).get('code_challenge_method') is None:
+            return response_builder(400, {
+                'error_message': "The authorization request does not contain 'code_challenge_method' parameter."
+            })
+
         authlete = AuthleteSdk(
             api_key=os.environ['AUTHLETE_API_KEY'],
             api_secret=os.environ['AUTHLETE_API_SECRET']
