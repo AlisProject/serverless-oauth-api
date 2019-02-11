@@ -12,6 +12,7 @@ from lib.settings import AUTHLETE_INTROSPECTION_URL, AUTHLETE_INTROSPECTION_SUCC
 from lib.settings import AUTHLETE_USERINFO_URL, AUTHLETE_TOKEN_URL, AUTHLETE_USERINFO_SUCCESS_CODE
 from lib.settings import AUTHLETE_ACCESS_TOKEN_SUCCESS_CODE, AUTHLETE_REFRESH_TOKEN_SUCCESS_CODE
 from lib.settings import AUTHLETE_CLIENT_INFO_URL
+from lib.utils import strip_authlete_code
 
 
 class AuthleteSdk():
@@ -112,7 +113,7 @@ class AuthleteSdk():
             raise AuthleteApiError(
                 endpoint=AUTHLETE_INTROSPECTION_URL,
                 status_code=400,
-                message=result['resultMessage']
+                message=strip_authlete_code(result['resultMessage'])
             )
         return json.loads(result['responseContent'])
 
@@ -191,14 +192,14 @@ class AuthleteSdk():
             raise AuthleteApiError(
                 endpoint=AUTHLETE_USERINFO_URL,
                 status_code=response.status_code,
-                message=user_info.get('resultMessage')
+                message=strip_authlete_code(user_info.get('resultMessage'))
             )
 
         if user_info['resultCode'] != AUTHLETE_USERINFO_SUCCESS_CODE:
             raise AuthleteApiError(
                 endpoint=AUTHLETE_USERINFO_URL,
                 status_code=401,
-                message=user_info.get('resultMessage')
+                message=strip_authlete_code(user_info.get('resultMessage'))
             )
 
         return json.loads(user_info.get('responseContent'))
@@ -214,7 +215,7 @@ class AuthleteSdk():
             raise AuthleteApiError(
                 endpoint=AUTHLETE_CLIENT_INFO_URL,
                 status_code=response.status_code,
-                message=client_info.get('resultMessage')
+                message=strip_authlete_code(client_info.get('resultMessage'))
             )
 
         client_info = json.loads(response.text)
@@ -245,7 +246,7 @@ class AuthleteSdk():
             raise AuthleteApiError(
                 endpoint=AUTHLETE_TOKEN_URL,
                 status_code=response.status_code,
-                message=token_info.get('resultMessage')
+                message=strip_authlete_code(token_info.get('resultMessage'))
             )
 
         if token_info.get('resultCode') != AUTHLETE_REFRESH_TOKEN_SUCCESS_CODE:
@@ -253,7 +254,7 @@ class AuthleteSdk():
                 raise AuthleteApiError(
                     endpoint=AUTHLETE_TOKEN_URL,
                     status_code=400,
-                    message=token_info.get('resultMessage')
+                    message=strip_authlete_code(token_info.get('resultMessage'))
                 )
             else:
                 raise AuthleteApiError(
@@ -292,7 +293,7 @@ class AuthleteSdk():
                 raise AuthleteApiError(
                     endpoint=AUTHLETE_TOKEN_URL,
                     status_code=400,
-                    message=token_info.get('resultMessage')
+                    message=strip_authlete_code(token_info.get('resultMessage'))
                 )
             else:
                 raise AuthleteApiError(
