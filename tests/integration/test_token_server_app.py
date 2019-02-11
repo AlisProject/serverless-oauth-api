@@ -33,6 +33,17 @@ class TestTokenServerApp(object):
         assert 'token_type' in data
         assert 'expires_in' in data
 
+    def test_return_415_with_unsupported_media_type(self, endpoint):
+        response = requests.post(
+            url=endpoint + '/token',
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic ' + authlete_test_sdk.get_token_for_client_authentication()
+            },
+            data='grant_type=authorization_code&code='+self.authorization_code+'&redirect_uri=http://localhost&code_verifier='+self.code_verifier
+        )
+        assert response.status_code == 415
+
     def test_return_200_with_refresh_token(self, endpoint):
         refresh_token = authlete_test_sdk.get_refresh_token(
             code_verifier=self.code_verifier,

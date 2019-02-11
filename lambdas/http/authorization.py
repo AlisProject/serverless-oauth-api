@@ -1,6 +1,4 @@
-import json
 import os
-import re
 import urllib.parse
 from jose import jwt
 from lib.authlete_sdk import AuthleteSdk
@@ -16,12 +14,17 @@ from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_REDIRECT_URI_IS_NOT_REGIST
 from lib.settings import AUTHLETE_AUTHORIZATION_ERROR_RESPONSE_TYPE_IS_INVALID
 from lib.settings import AUTHLETE_AUTHORIZATION_SUCCESS_CODE
 from lib.settings import AUTHLETE_AUTHORIZATION_ISSUE_SUBJECT_DOES_NOT_CONTAIN
-from lib.utils import response_builder, logger, verify_jwt_token, get_access_token_from_header, verify_scope_parameter, strip_authlete_code
+from lib.utils import response_builder, logger, verify_jwt_token, get_access_token_from_header
+from lib.utils import verify_scope_parameter, strip_authlete_code, verify_supported_media_type
 
 
 def handler(event, context):
     try:
         logger.info(event)
+        if verify_supported_media_type(event['headers']) is False:
+            return response_builder(415, {
+                'error_message': "This API only support 'content-type: application/x-www-form-urlencoded' media type"
+            })
 
         # jwtの検証
         jwt_token = get_access_token_from_header(event['headers'])

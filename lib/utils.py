@@ -95,6 +95,17 @@ def verify_scope_parameter(scope_str):
     return True
 
 
+def verify_supported_media_type(headers):
+    lower_headers = {}
+    for name in headers:
+        lower_headers[name.lower()] = headers[name]
+
+    if lower_headers.get('content-type') is not None \
+            and lower_headers.get('content-type') != 'application/x-www-form-urlencoded':
+        return False
+    return True
+
+
 class DecimalEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, decimal.Decimal):

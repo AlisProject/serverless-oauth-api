@@ -27,6 +27,16 @@ class TestIntrospection(object):
         assert 'active' in data
         assert data['active'] is True
 
+    def test_return_415_with_unsupported_media_type(self, endpoint):
+        response = requests.post(
+            url=endpoint + '/introspection',
+            headers={
+                'Content-Type': 'application/json'
+            },
+            data='token='+self.access_token
+        )
+        assert response.status_code == 415
+
     def test_return_200_with_false(self, endpoint):
         response = requests.post(
             url=endpoint + '/introspection',

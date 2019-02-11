@@ -1,12 +1,17 @@
 import os
 from lib.authlete_sdk import AuthleteSdk
 from lib.exceptions import ValidationError, AuthleteApiError
-from lib.utils import response_builder, logger
+from lib.utils import response_builder, logger, verify_supported_media_type
 
 
 def handler(event, context):
     try:
         logger.info(event)
+        if verify_supported_media_type(event['headers']) is False:
+            return response_builder(415, {
+                'error_message': "This API only support 'content-type: application/x-www-form-urlencoded' media type"
+            })
+
         authlete = AuthleteSdk(
             api_key=os.environ['AUTHLETE_API_KEY'],
             api_secret=os.environ['AUTHLETE_API_SECRET']
