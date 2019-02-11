@@ -8,6 +8,6 @@ class TestOpenidConfiguration(TestCase):
     def test_return_500(self):
         os.environ['AUTHLETE_API_KEY'] = 'xxxxxxx'
         os.environ['AUTHLETE_API_SECRET'] = 'xxxxxxx'
-        response = handler({'body':'token=aaaaaa'}, {})
+        response = handler({'body': 'token=aaaaaa', 'headers': {}}, {})
         assert response['statusCode'] == 500
         assert response['body'] == '{"error_message": "Internal Server Error"}'
