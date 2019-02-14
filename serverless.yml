@@ -14,7 +14,7 @@ provider:
   iamRoleStatements:
     - Effect: "Allow"
       Action:
-        - "*"
+        - "cognito-idp:AdminGetUser"
       Resource:
         - "arn:aws:cognito-idp:${self:provider.region}:*:userpool/${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolId}"
 
