@@ -20,16 +20,16 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
-      - run:
-          name: run unit tests
-          command: |
-            . venv/bin/activate
-            pytest tests/unit/  -s
-      - run:
-          name: run integration tests
-          command: |
-            . venv/bin/activate
-            pytest tests/integration/ --stage $INTEGRATION_TEST_STAGE --region $AWS_DEFAULT_REGION -s
+#      - run:
+#          name: run unit tests
+#          command: |
+#            . venv/bin/activate
+#            pytest tests/unit/  -s
+#      - run:
+#          name: run integration tests
+#          command: |
+#            . venv/bin/activate
+#            pytest tests/integration/ --stage $INTEGRATION_TEST_STAGE --region $AWS_DEFAULT_REGION -s
   move-deployment-packge:
     docker:
       - image: circleci/python:3.7.1
