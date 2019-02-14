@@ -36,8 +36,15 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: pip install awscli
-      - run: npm install
+      - run: sudo pip install awscli
+      - run:
+          name: Install Serverless
+          command: |
+            sudo apt-get install curl
+            curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            sudo npm install npm@latest -g
+            npm install
       - run:
           name: chmod to deploy script
           command: chmod -R +x ./sh/*
