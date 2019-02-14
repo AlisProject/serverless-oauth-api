@@ -20,16 +20,16 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
-#      - run:
-#          name: run unit tests
-#          command: |
-#            . venv/bin/activate
-#            pytest tests/unit/  -s
-#      - run:
-#          name: run integration tests
-#          command: |
-#            . venv/bin/activate
-#            pytest tests/integration/ --stage $INTEGRATION_TEST_STAGE --region $AWS_DEFAULT_REGION -s
+      - run:
+          name: run unit tests
+          command: |
+            . venv/bin/activate
+            pytest tests/unit/  -s
+      - run:
+          name: run integration tests
+          command: |
+            . venv/bin/activate
+            pytest tests/integration/ --stage $INTEGRATION_TEST_STAGE --region $AWS_DEFAULT_REGION -s
   move-deployment-packge:
     docker:
       - image: circleci/python:3.7.1
@@ -46,10 +46,10 @@ jobs:
             sudo npm install npm@latest -g
             npm install
       - run:
-          name: chmod to deploy script
+          name: chmod to moving script
           command: chmod -R +x ./sh/*
       - deploy:
-          name: deploy for production
+          name: Moving the deployment package to S3 Bucket
           command: ./sh/move-deployment-packge.sh
 workflows:
   version: 2
