@@ -76,6 +76,28 @@ $ pytest tests/unit/ -s
 $ pytest tests/integration/ --stage $INTEGRATION_TEST_STAGE --region $AWS_DEFAULT_REGION -s
 ```
 
-## CI/CD
+## CI
 PR送信時にCIが走ります。テストを通した状態でレビュー依頼を実施してください
-CDに関しては別途検討
+
+## デプロイ
+本GitHub上でtagを作るとデプロイパッケージがS3バケットにputされます。環境変数DEPLOYMENT_BUCKETにデプロイしたいバケット名を指定してください。
+指定したtagをS3オブジェクトのprefixとしてデプロイパッケージがアップロードされます。
+
+```bash
+$ git tag 1.0.0
+$ git push origin 1.0.0
+```
+
+上記のデプロイが正常終了後は以下のaws-cliでCloudFormationテンプレートを反映させてください。なお、stack-nameは自由に決めて構いません。
+
+新規追加時
+
+```bash
+$ aws cloudformation create-stack --stack-name <スタック名> --template-url https://s3-ap-northeast-1.amazonaws.com/<バケット名>/<tag名>/cloudformation-template-update-stack.json --capabilities '["CAPABILITY_IAM","CAPABILITY_NAMED_IAM"]'
+```
+
+既存stack更新時
+
+```bash
+$ aws cloudformation update-stack --stack-name <スタック名> --template-url https://s3-ap-northeast-1.amazonaws.com/<バケット名>/<tag名>/cloudformation-template-update-stack.json --capabilities '["CAPABILITY_IAM","CAPABILITY_NAMED_IAM"]'
+```
