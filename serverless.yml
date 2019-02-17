@@ -6,7 +6,7 @@ provider:
   runtime: python3.7
   stage: ${env:ALIS_APP_ID}
   endpointType: regional
-  memorySize: 256
+  memorySize: 128
   environment:
     AUTHLETE_API_KEY: ${ssm:${env:ALIS_APP_ID}ssmAutlteleApiKey}
     AUTHLETE_API_SECRET: ${ssm:${env:ALIS_APP_ID}ssmAutlteleApiSecret}
