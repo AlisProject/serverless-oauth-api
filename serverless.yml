@@ -79,3 +79,4 @@ custom:
 plugins:
   - serverless-python-requirements
   - serverless-prune-plugin
+  - alis-packaging
