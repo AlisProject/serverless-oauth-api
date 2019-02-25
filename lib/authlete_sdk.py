@@ -11,7 +11,8 @@ from lib.settings import AUTHLETE_OPENID_CONFIGURATION_URL, API_DOMAIN, INTROSPE
 from lib.settings import AUTHLETE_INTROSPECTION_URL, AUTHLETE_INTROSPECTION_SUCCESS_CODE
 from lib.settings import AUTHLETE_USERINFO_URL, AUTHLETE_TOKEN_URL, AUTHLETE_USERINFO_SUCCESS_CODE
 from lib.settings import AUTHLETE_ACCESS_TOKEN_SUCCESS_CODE, AUTHLETE_REFRESH_TOKEN_SUCCESS_CODE
-from lib.settings import AUTHLETE_CLIENT_INFO_URL
+from lib.settings import AUTHLETE_CLIENT_INFO_URL, AUTHLETE_CLIENT_LIST_URL, AUTHLETE_CLIENT_DELETE_URL
+from lib.settings import AUTHLETE_DELETE_CLIENT_ERROR_CLIENT_DOES_NOT_EXIST
 from lib.utils import strip_authlete_code
 
 
@@ -203,6 +204,39 @@ class AuthleteSdk():
             )
 
         return json.loads(user_info.get('responseContent'))
+
+    def delete_client(self, clientid, subject):
+        response = requests.delete(
+            url=f"{AUTHLETE_CLIENT_DELETE_URL}/{clientid}/{subject}",
+            auth=(self.api_key, self.api_secret),
+        )
+        result_json = json.loads(response.text)
+        if result_json["resultCode"] == AUTHLETE_DELETE_CLIENT_ERROR_CLIENT_DOES_NOT_EXIST:
+            raise ValidationError(
+                status_code=response.status_code,
+                message=result_json["resultMessage"]
+            )
+        elif response.status_code is not 200:
+            raise AuthleteApiError(
+                endpoint=f"{AUTHLETE_CLIENT_DELETE_URL}/{clientid}/{subject}",
+                status_code=response.status_code,
+                message=response.text
+            )
+        return json.loads(response.text)
+
+    def get_client_list(self, params):
+        response = requests.get(
+            url=AUTHLETE_CLIENT_LIST_URL,
+            auth=(self.api_key, self.api_secret),
+            params=params
+        )
+        if response.status_code is not 200:
+            raise AuthleteApiError(
+                endpoint=AUTHLETE_CLIENT_LIST_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
+        return json.loads(response.text)
 
     def get_client_type(self, client_id):
         response = requests.get(

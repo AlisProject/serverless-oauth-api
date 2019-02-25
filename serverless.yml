@@ -45,6 +45,20 @@ functions:
       - http:
           path: /introspection
           method: post
+  client_delete:
+    handler: lambdas/http/client/delete.handler
+    events:
+      - http:
+          path: /client/delete
+          method: post
+          cors: true
+  client_list:
+    handler: lambdas/http/client/list.handler
+    events:
+      - http:
+          path: /client/list
+          method: get
+          cors: true
   jwks:
     handler: lambdas/http/jwks.handler
     events:

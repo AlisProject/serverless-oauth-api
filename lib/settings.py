@@ -6,6 +6,8 @@ AUTHLETE_JWK_INFORMATION_URL = 'https://api.authlete.com/api/service/jwks/get'
 AUTHLETE_USERINFO_URL = 'https://api.authlete.com/api/auth/userinfo/issue'
 AUTHLETE_TOKEN_URL = 'https://api.authlete.com/api/auth/token'
 AUTHLETE_CLIENT_INFO_URL = 'https://api.authlete.com/api/client/get'
+AUTHLETE_CLIENT_LIST_URL = 'https://api.authlete.com/api/client/authorization/get/list'
+AUTHLETE_CLIENT_DELETE_URL = 'https://api.authlete.com/api/client/authorization/delete'
 
 AUTHLETE_INTROSPECTION_SUCCESS_CODE = 'A145001'
 AUTHLETE_USERINFO_SUCCESS_CODE = 'A096001'
@@ -41,6 +43,7 @@ AUTHLETE_AUTHORIZATION_ISSUE_SUBJECT_DOES_NOT_CONTAIN                  = 'A04220
 AUTHLETE_AUTHORIZATION_SUCCESS_CODE                                    = 'A040001'
 AUTHLETE_INTROSPECTION_SUCCESS_CODE                                    = 'A145001'
 AUTHLETE_USERINFO_SUCCESS_CODE                                         = 'A096001'
+AUTHLETE_DELETE_CLIENT_ERROR_CLIENT_DOES_NOT_EXIST                     = 'A001212'
 
 API_DOMAIN = 'https://oauth2.alis.to'
 INTROSPECTION_ENDPOINT = '/introspection'
