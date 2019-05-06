@@ -4,7 +4,7 @@ provider:
   name: aws
   region: ${env:AWS_DEFAULT_REGION}
   runtime: python3.7
-  stage: ${env:ALIS_APP_ID}
+  stage: production
   endpointType: regional
   memorySize: 256
   environment:

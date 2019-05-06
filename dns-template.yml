@@ -27,7 +27,7 @@ Resources:
       TTL: 60
       Type: CNAME
       ResourceRecords:
-      - !GetAtt RestApiDomain.RegionalDomainName
+      - !GetAtt RestApiDomain.DistributionDomainName
   RestApiDomain:
     Type: AWS::ApiGateway::DomainName
     Properties:
@@ -35,10 +35,7 @@ Resources:
       - ${SubDomain}.${Domain}
       - SubDomain: !Ref SubDomain
         Domain: !Ref Doamin
-      EndpointConfiguration:
-        Types:
-        - REGIONAL
-      RegionalCertificateArn: !Ref CertificateArn
+      CertificateArn: !Ref CertificateArn
   ApiBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
