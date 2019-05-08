@@ -2,6 +2,8 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: OAuth API Domain
 
 Parameters:
+  AlisAppId:
+    Type: String
   Doamin:
     Type: String
     Default: alis.to
@@ -44,7 +46,7 @@ Resources:
       - SubDomain: !Ref SubDomain
         Domain: !Ref Doamin
       RestApiId: !Ref RestApiId
-      Stage: production
+      Stage: !Ref AlisAppId
     DependsOn:
       - RestApiRecordSet
       - RestApiDomain
