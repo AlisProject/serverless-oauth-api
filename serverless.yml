@@ -8,8 +8,8 @@ provider:
   endpointType: regional
   memorySize: 256
   environment:
-    AUTHLETE_API_KEY: ${ssm:${env:ALIS_APP_ID}ssmAutlteleApiKey}
-    AUTHLETE_API_SECRET: ${ssm:${env:ALIS_APP_ID}ssmAutlteleApiSecret}
+    AUTHLETE_API_KEY: ${ssm:${env:ALIS_APP_ID}ssmAuthleteApiKey}
+    AUTHLETE_API_SECRET: ${ssm:${env:ALIS_APP_ID}ssmAuthleteApiSecret}
     COGNITO_USER_POOL_ID: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolId}
   iamRoleStatements:
     - Effect: "Allow"

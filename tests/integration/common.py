@@ -55,11 +55,11 @@ class AuthleteSDKForTest():
 
         ssm = boto3.client('ssm')
         param = ssm.get_parameter(
-            Name=os.environ['ALIS_APP_ID'] + 'ssmAutlteleApiKey'
+            Name=os.environ['ALIS_APP_ID'] + 'ssmAuthleteApiKey'
         )
         self.authlete_api_key = param['Parameter']['Value']
         param = ssm.get_parameter(
-            Name=os.environ['ALIS_APP_ID'] + 'ssmAutlteleApiSecret'
+            Name=os.environ['ALIS_APP_ID'] + 'ssmAuthleteApiSecret'
         )
         self.authlete_api_secret = param['Parameter']['Value']
 
