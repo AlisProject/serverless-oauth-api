@@ -29,8 +29,8 @@ $ direnv allow
 ```
 
 ### Setup SSM Params
-Set up `AutlteleApiKey` and `AutlteleApiSecret` ssm values with the following PR
-https://github.com/AlisProject/environment/pull/24/files
+Set up `AutlteleApiKey` and `AutlteleApiSecret` ssm values with the following link.
+https://github.com/AlisProject/environment
 
 ローカルでインテグレーションテストを実施してうまく動けばセットアップは完了です
 
