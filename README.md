@@ -108,5 +108,5 @@ $ aws cloudformation update-stack --stack-name <スタック名> --template-url 
 APIをデプロイ後にdns-templateのスタックをデプロイすることでドメインが割り当てられます
 
 ```
-aws cloudformation deploy --stack-name <スタック名> --template /path/to/dns-template.yml --capabilities '["CAPABILITY_AUTO_EXPAND"]' --parameter-overrides Doamin=<ネイキッドドメイン> SubDomain=<サブドメイン> HostedZoneId=<Route53のゾーンID> RestApiId=<割り当てたいAPIのID> CertificateArn=<ACMで発行した証明書のARN>
+aws cloudformation deploy --stack-name <スタック名> --template /path/to/dns-template.yml --capabilities '["CAPABILITY_AUTO_EXPAND"]' --parameter-overrides AlisAppId=$ALIS_APP_ID Doamin=<ネイキッドドメイン> SubDomain=<サブドメイン> HostedZoneId=<Route53のゾーンID> RestApiId=<割り当てたいAPIのID> CertificateArn=<ACMで発行した証明書のARN>
 ```
