@@ -11,9 +11,7 @@ import hashlib
 
 def get_endpoint_url(stage, region):
     cloudformation = boto3.client('cloudformation', region_name=region)
-    f = open(os.path.dirname(__file__)+'/../../serverless.yml', 'r+')
-    data = yaml.load(f)
-    stackname = data['service'] + '-' + stage
+    stackname = os.environ['ALIS_APP_ID'] + '-' + stage
     response = cloudformation.describe_stacks(
         StackName=stackname
     )

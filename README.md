@@ -101,12 +101,3 @@ $ aws cloudformation create-stack --stack-name <スタック名> --template-url 
 ```bash
 $ aws cloudformation update-stack --stack-name <スタック名> --template-url https://s3-ap-northeast-1.amazonaws.com/<バケット名>/<tag名>/cloudformation-template-update-stack.json --capabilities '["CAPABILITY_IAM","CAPABILITY_NAMED_IAM"]'
 ```
-
-
-## ドメインの割当
-
-APIをデプロイ後にdns-templateのスタックをデプロイすることでドメインが割り当てられます
-
-```
-aws cloudformation deploy --stack-name <スタック名> --template /path/to/dns-template.yml --capabilities '["CAPABILITY_AUTO_EXPAND"]' --parameter-overrides AlisAppId=$ALIS_APP_ID Doamin=<ネイキッドドメイン> SubDomain=<サブドメイン> HostedZoneId=<Route53のゾーンID> RestApiId=<割り当てたいAPIのID> CertificateArn=<ACMで発行した証明書のARN>
-```
