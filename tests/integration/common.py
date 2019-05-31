@@ -97,7 +97,7 @@ class AuthleteSDKForTest():
         data = response.json()
         return data['refreshToken']
 
-    def get_authorization_code(self, code_challenge):
+    def get_authorization_code(self, code_challenge, is_phone_number_verified_user=True):
         response = requests.post(
             url='https://api.authlete.com/api/auth/authorization',
             auth=(
@@ -109,6 +109,8 @@ class AuthleteSDKForTest():
         )
         data = response.json()
 
+        cognito_user_id = os.environ['TEST_COGNITO_USER_ID'] if is_phone_number_verified_user else os.environ['TEST_COGNITO_PHONE_NUMBER_NOT_VERIFIED_USER_ID']
+
         response = requests.post(
             url='https://api.authlete.com/api/auth/authorization/issue',
             auth=(
@@ -116,7 +118,7 @@ class AuthleteSDKForTest():
                 self.authlete_api_secret
             ),
             headers={'content-type': 'application/json'},
-            data=json.dumps({'ticket': data['ticket'], 'subject': os.environ['TEST_COGNITO_USER_ID']})
+            data=json.dumps({'ticket': data['ticket'], 'subject': cognito_user_id})
         )
 
         data = response.json()

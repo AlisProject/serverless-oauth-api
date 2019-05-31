@@ -12,6 +12,7 @@ class TestTokenClientApp(object):
         self.code_verifier = authlete_test_sdk.get_code_verifier()
         self.code_challenge = authlete_test_sdk.get_code_challenge(self.code_verifier)
         self.authorization_code = authlete_test_sdk.get_authorization_code(self.code_challenge)
+        self.authorization_code_by_phone_number_not_verified_user = authlete_test_sdk.get_authorization_code(self.code_challenge, False)
 
     def test_return_200_with_authorization_code(self, endpoint):
         response = requests.post(
@@ -133,3 +134,16 @@ class TestTokenClientApp(object):
         assert response.status_code == 400
         error = response.json()
         assert error['error_message'] == 'Missing client_id'
+
+    def test_return_403_with_phone_number_not_verified_user(self, endpoint):
+        response = requests.post(
+            url=endpoint + '/token',
+            headers={
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data='grant_type=authorization_code&code='+self.authorization_code_by_phone_number_not_verified_user+'&redirect_uri=http://localhost&code_verifier='+self.code_verifier+'&client_id='+os.environ['TEST_AUTHLETE_CLIENT_APP_CLIENT_ID']
+        )
+
+        assert response.status_code == 403
+        error = response.json()
+        assert error['error_message'] == 'phone_number must be verified'

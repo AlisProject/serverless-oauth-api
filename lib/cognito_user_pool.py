@@ -18,3 +18,14 @@ class CognitoUserPool():
 
         except ClientError as e:
             raise e
+
+    def get_user_attributes(self, username):
+        try:
+            response = self.client.admin_get_user(
+                UserPoolId=self.user_pool_id,
+                Username=username
+            )
+            return response['UserAttributes']
+
+        except ClientError as e:
+            raise e
