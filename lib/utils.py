@@ -80,20 +80,10 @@ def verify_jwt_token(token):
 
 
 def verify_scope_parameter(scope_str):
-    # スペースで区切られた2つの値が指定されており、
-    # 一つはopenidでもう一つはreadかwriteが指定されていることをチェックする
-    scope_str = re.sub(r'^\s+', '', scope_str)
-    scope_str = re.sub(r'\s+$', '', scope_str)
-    scopes = re.split(r'\s+', scope_str)
-    if len(scopes) != 2:
-        return False
-    if not 'openid' in scopes:
-        return False
-    scopes.remove('openid')
-    if scopes[0] != 'read' and scopes[0] != 'write':
-        return False
-    return True
-
+    accept_scopes = ['openid read', 'openid read write']
+    if scope_str in accept_scopes:
+        return True
+    return False
 
 def verify_supported_media_type(headers):
     lower_headers = {}

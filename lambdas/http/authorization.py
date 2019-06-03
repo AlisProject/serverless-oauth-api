@@ -41,7 +41,7 @@ def handler(event, context):
 
         # scopeの検証
         if not verify_scope_parameter(params['scope'][0]):
-            return response_builder(400, {"error_message": "invalid scope parameter. scope parameter must be 'openid read' or 'openid write'"})
+            return response_builder(400, {"error_message": "invalid scope parameter. scope parameter must be 'openid read' or 'openid read write'"})
 
         # authrazition API
         new_params = urllib.parse.urlencode(params, doseq=True)
