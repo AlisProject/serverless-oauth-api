@@ -17,7 +17,7 @@ class TestAuthorization(object):
                 )
         return result['AuthenticationResult']['IdToken']
 
-    def test_return_200(self, endpoint):
+    def test_return_200_scope_read(self, endpoint):
         id_token = self.__get_id_token()
         response = requests.post(
             endpoint + '/authorization',
@@ -29,6 +29,28 @@ class TestAuthorization(object):
                 'client_id': os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'],
                 'redirect_uri': 'http://localhost',
                 'scope': 'openid read',
+                'code_challenge': 'hcCb3gToI1GPZeS_SIYWvaNT_5u0GB1oqOGQJqRKMSE',
+                'code_challenge_method': 'S256',
+                'subject': 'fugafuga',
+                'sub': 'hogehgoe'
+            }
+        )
+        data = response.json()
+        assert response.status_code == 200
+        assert 'redirect_uri' in data
+
+    def test_return_200_scope_write(self, endpoint):
+        id_token = self.__get_id_token()
+        response = requests.post(
+            endpoint + '/authorization',
+            headers={
+                'Authorization': f'Bearer {id_token}'
+            },
+            data={
+                'response_type': 'code',
+                'client_id': os.environ['TEST_AUTHLETE_SERVER_APP_CLIENT_ID'],
+                'redirect_uri': 'http://localhost',
+                'scope': 'openid read write',
                 'code_challenge': 'hcCb3gToI1GPZeS_SIYWvaNT_5u0GB1oqOGQJqRKMSE',
                 'code_challenge_method': 'S256',
                 'subject': 'fugafuga',
