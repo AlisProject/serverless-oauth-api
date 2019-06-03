@@ -6,18 +6,20 @@ from lib.utils import response_builder, logger, verify_supported_media_type
 
 
 def handler(event, context):
+    if verify_supported_media_type(event['headers']) is False:
+        return response_builder(415, {
+            'error_message': "This API only support 'content-type: application/x-www-form-urlencoded' media type"
+        })
+
     token = {}
 
-    try:
-        if verify_supported_media_type(event['headers']) is False:
-            return response_builder(415, {
-                'error_message': "This API only support 'content-type: application/x-www-form-urlencoded' media type"
-            })
+    authlete = AuthleteSdk(
+        api_key=os.environ['AUTHLETE_API_KEY'],
+        api_secret=os.environ['AUTHLETE_API_SECRET']
+    )
 
-        authlete = AuthleteSdk(
-            api_key=os.environ['AUTHLETE_API_KEY'],
-            api_secret=os.environ['AUTHLETE_API_SECRET']
-        )
+    try:
+        # トークン取得処理
 
         grant_type = authlete.get_grant_type(
             body=event['body']
@@ -28,7 +30,6 @@ def handler(event, context):
             body=event['body']
         )
 
-        # トークン取得処理
         if grant_type == 'authorization_code':
             if data.get('client_secret') is None:
                 token = authlete.get_access_token_from_code(
@@ -75,11 +76,6 @@ def handler(event, context):
     try:
         congito_user_pool = CognitoUserPool(
             user_pool_id=os.environ['COGNITO_USER_POOL_ID']
-        )
-
-        authlete = AuthleteSdk(
-            api_key=os.environ['AUTHLETE_API_KEY'],
-            api_secret=os.environ['AUTHLETE_API_SECRET']
         )
 
         access_token = token.get('access_token')
