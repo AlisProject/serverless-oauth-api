@@ -6,21 +6,27 @@ from lib.utils import response_builder, logger, verify_supported_media_type
 
 
 def handler(event, context):
-    if verify_supported_media_type(event['headers']) is False:
-        return response_builder(415, {
-            'error_message': "This API only support 'content-type: application/x-www-form-urlencoded' media type"
+    # 初期化処理
+    token = {}
+    authlete = None
+    try:
+        if verify_supported_media_type(event['headers']) is False:
+            return response_builder(415, {
+                'error_message': "This API only support 'content-type: application/x-www-form-urlencoded' media type"
+            })
+
+        authlete = AuthleteSdk(
+            api_key=os.environ['AUTHLETE_API_KEY'],
+            api_secret=os.environ['AUTHLETE_API_SECRET']
+        )
+    except Exception as e:
+        logger.error(e)
+        return response_builder(500, {
+            'error_message': 'Internal Server Error'
         })
 
-    token = {}
-
-    authlete = AuthleteSdk(
-        api_key=os.environ['AUTHLETE_API_KEY'],
-        api_secret=os.environ['AUTHLETE_API_SECRET']
-    )
-
+    # トークン取得処理
     try:
-        # トークン取得処理
-
         grant_type = authlete.get_grant_type(
             body=event['body']
         )
